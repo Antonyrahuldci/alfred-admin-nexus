@@ -11,6 +11,13 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
+  Coins,
+  Mail,
+  Activity,
+  Shield,
+  Sparkles,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,12 +30,15 @@ interface SidebarProps {
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/" },
   { icon: Users, label: "Users", path: "/users" },
-  { icon: CreditCard, label: "Subscriptions", path: "/subscriptions" },
-  { icon: BarChart3, label: "Analytics", path: "/analytics" },
-  { icon: ListTodo, label: "Tasks", path: "/tasks" },
-  { icon: Bell, label: "Notifications", path: "/notifications" },
+  { icon: TrendingUp, label: "User Analytics", path: "/user-analytics" },
+  { icon: CreditCard, label: "Revenue & Subs", path: "/subscriptions" },
+  { icon: Coins, label: "Credit & Usage", path: "/credit-usage" },
+  { icon: Mail, label: "Communications", path: "/communications" },
+  { icon: Activity, label: "System Health", path: "/system-health" },
+  { icon: Shield, label: "Security", path: "/security" },
   { icon: Plug, label: "Integrations", path: "/integrations" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Sparkles, label: "AI Insights", path: "/ai-insights" },
+  { icon: UserCog, label: "Admin Controls", path: "/admin-controls" },
   { icon: FileText, label: "Reports", path: "/reports" },
 ];
 

@@ -1,4 +1,4 @@
-import { Users, UserCheck, DollarSign, FileText, Image, TrendingUp } from "lucide-react";
+import { Users, UserCheck, DollarSign, FileText, Image, TrendingUp, Percent, TrendingDown, Wallet } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +60,7 @@ export default function Overview() {
         <p className="text-muted-foreground">Welcome to your Simbli Alfred admin dashboard</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
           value="5,234"
@@ -68,29 +68,85 @@ export default function Overview() {
           trend={{ value: 12.5, isPositive: true }}
         />
         <StatCard
-          title="Active Users"
-          value="4,892"
+          title="Active Users (Today)"
+          value="892"
           icon={UserCheck}
           trend={{ value: 8.2, isPositive: true }}
         />
         <StatCard
-          title="MRR"
-          value="$52,000"
+          title="Total Revenue"
+          value="$624,000"
           icon={DollarSign}
           trend={{ value: 23.1, isPositive: true }}
         />
         <StatCard
-          title="AI Words Generated"
-          value="12.5M"
-          icon={FileText}
-          trend={{ value: 15.3, isPositive: true }}
+          title="OpenAI Balance"
+          value="$12,450"
+          icon={Wallet}
+          trend={{ value: -15.3, isPositive: false }}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="MRR"
+          value="$52,000"
+          icon={DollarSign}
+          trend={{ value: 18.5, isPositive: true }}
         />
         <StatCard
-          title="Images Created"
-          value="234K"
-          icon={Image}
-          trend={{ value: 9.7, isPositive: true }}
+          title="ARR"
+          value="$624,000"
+          icon={TrendingUp}
+          trend={{ value: 22.3, isPositive: true }}
         />
+        <StatCard
+          title="Conversion Rate"
+          value="12.4%"
+          icon={Percent}
+          trend={{ value: 3.2, isPositive: true }}
+        />
+        <StatCard
+          title="Churn Rate"
+          value="2.8%"
+          icon={TrendingDown}
+          trend={{ value: -0.5, isPositive: true }}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">CAC</p>
+              <p className="text-2xl font-bold">$145</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">LTV</p>
+              <p className="text-2xl font-bold">$2,340</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">AI Words Generated</p>
+              <p className="text-2xl font-bold">12.5M</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Images Created</p>
+              <p className="text-2xl font-bold">234K</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
