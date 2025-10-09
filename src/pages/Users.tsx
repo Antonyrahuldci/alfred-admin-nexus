@@ -44,50 +44,34 @@ import {
 } from "recharts";
 
 const mockUsers = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@email.com",
-    plan: "Pro",
-    joinDate: "2024-01-15",
-    lastActive: "2 hours ago",
-    wordCount: 125000,
-    images: 450,
-    serpUsage: 89,
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane.smith@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-11-20",
-    lastActive: "5 minutes ago",
-    wordCount: 450000,
-    images: 1200,
-    serpUsage: 234,
-  },
-  {
-    id: 3,
-    name: "Mike Wilson",
-    email: "mike.wilson@email.com",
-    plan: "Free",
-    joinDate: "2024-05-10",
-    lastActive: "1 day ago",
-    wordCount: 15000,
-    images: 25,
-    serpUsage: 12,
-  },
-  {
-    id: 4,
-    name: "Sarah Jones",
-    email: "sarah.jones@email.com",
-    plan: "Pro",
-    joinDate: "2024-02-28",
-    lastActive: "3 hours ago",
-    wordCount: 275000,
-    images: 680,
-    serpUsage: 145,
-  },
+  { id: 1, name: "John Doe", email: "john.doe@email.com", plan: "Pro", joinDate: "2024-01-15", lastActive: "2 hours ago", wordCount: 125000, images: 450, serpUsage: 89 },
+  { id: 2, name: "Jane Smith", email: "jane.smith@email.com", plan: "Enterprise", joinDate: "2023-11-20", lastActive: "5 minutes ago", wordCount: 450000, images: 1200, serpUsage: 234 },
+  { id: 3, name: "Mike Wilson", email: "mike.wilson@email.com", plan: "Free", joinDate: "2024-05-10", lastActive: "1 day ago", wordCount: 15000, images: 25, serpUsage: 12 },
+  { id: 4, name: "Sarah Jones", email: "sarah.jones@email.com", plan: "Pro", joinDate: "2024-02-28", lastActive: "3 hours ago", wordCount: 275000, images: 680, serpUsage: 145 },
+  { id: 5, name: "David Brown", email: "david.brown@email.com", plan: "Enterprise", joinDate: "2023-12-05", lastActive: "1 hour ago", wordCount: 380000, images: 950, serpUsage: 198 },
+  { id: 6, name: "Emily Davis", email: "emily.davis@email.com", plan: "Pro", joinDate: "2024-03-18", lastActive: "30 minutes ago", wordCount: 195000, images: 520, serpUsage: 112 },
+  { id: 7, name: "Chris Martin", email: "chris.martin@email.com", plan: "Free", joinDate: "2024-06-22", lastActive: "5 days ago", wordCount: 8500, images: 15, serpUsage: 7 },
+  { id: 8, name: "Amanda White", email: "amanda.white@email.com", plan: "Pro", joinDate: "2024-01-30", lastActive: "4 hours ago", wordCount: 215000, images: 585, serpUsage: 128 },
+  { id: 9, name: "Robert Taylor", email: "robert.taylor@email.com", plan: "Enterprise", joinDate: "2023-10-15", lastActive: "15 minutes ago", wordCount: 520000, images: 1450, serpUsage: 276 },
+  { id: 10, name: "Lisa Anderson", email: "lisa.anderson@email.com", plan: "Free", joinDate: "2024-07-08", lastActive: "3 days ago", wordCount: 12000, images: 18, serpUsage: 9 },
+  { id: 11, name: "James Thomas", email: "james.thomas@email.com", plan: "Pro", joinDate: "2024-02-14", lastActive: "1 hour ago", wordCount: 245000, images: 620, serpUsage: 138 },
+  { id: 12, name: "Jessica Moore", email: "jessica.moore@email.com", plan: "Enterprise", joinDate: "2023-09-28", lastActive: "20 minutes ago", wordCount: 475000, images: 1380, serpUsage: 265 },
+  { id: 13, name: "Daniel Jackson", email: "daniel.jackson@email.com", plan: "Free", joinDate: "2024-08-01", lastActive: "2 days ago", wordCount: 9500, images: 12, serpUsage: 5 },
+  { id: 14, name: "Michelle Lee", email: "michelle.lee@email.com", plan: "Pro", joinDate: "2024-04-05", lastActive: "6 hours ago", wordCount: 185000, images: 495, serpUsage: 105 },
+  { id: 15, name: "Kevin Harris", email: "kevin.harris@email.com", plan: "Enterprise", joinDate: "2023-11-10", lastActive: "10 minutes ago", wordCount: 425000, images: 1150, serpUsage: 228 },
+  { id: 16, name: "Rachel Clark", email: "rachel.clark@email.com", plan: "Free", joinDate: "2024-06-15", lastActive: "4 days ago", wordCount: 11000, images: 20, serpUsage: 8 },
+  { id: 17, name: "Brian Lewis", email: "brian.lewis@email.com", plan: "Pro", joinDate: "2024-03-22", lastActive: "2 hours ago", wordCount: 205000, images: 545, serpUsage: 118 },
+  { id: 18, name: "Nicole Walker", email: "nicole.walker@email.com", plan: "Enterprise", joinDate: "2023-08-19", lastActive: "25 minutes ago", wordCount: 495000, images: 1425, serpUsage: 282 },
+  { id: 19, name: "Steven Hall", email: "steven.hall@email.com", plan: "Free", joinDate: "2024-07-20", lastActive: "6 days ago", wordCount: 7200, images: 10, serpUsage: 4 },
+  { id: 20, name: "Karen Allen", email: "karen.allen@email.com", plan: "Pro", joinDate: "2024-01-25", lastActive: "5 hours ago", wordCount: 235000, images: 605, serpUsage: 132 },
+  { id: 21, name: "Gary Young", email: "gary.young@email.com", plan: "Enterprise", joinDate: "2023-12-18", lastActive: "35 minutes ago", wordCount: 410000, images: 1090, serpUsage: 215 },
+  { id: 22, name: "Patricia King", email: "patricia.king@email.com", plan: "Free", joinDate: "2024-08-10", lastActive: "8 days ago", wordCount: 6800, images: 8, serpUsage: 3 },
+  { id: 23, name: "Timothy Wright", email: "timothy.wright@email.com", plan: "Pro", joinDate: "2024-04-12", lastActive: "1 hour ago", wordCount: 225000, images: 595, serpUsage: 125 },
+  { id: 24, name: "Sharon Lopez", email: "sharon.lopez@email.com", plan: "Enterprise", joinDate: "2023-10-30", lastActive: "45 minutes ago", wordCount: 465000, images: 1320, serpUsage: 252 },
+  { id: 25, name: "Edward Hill", email: "edward.hill@email.com", plan: "Free", joinDate: "2024-07-28", lastActive: "7 days ago", wordCount: 8900, images: 14, serpUsage: 6 },
+  { id: 26, name: "Donna Scott", email: "donna.scott@email.com", plan: "Pro", joinDate: "2024-02-08", lastActive: "3 hours ago", wordCount: 255000, images: 655, serpUsage: 142 },
+  { id: 27, name: "Ronald Green", email: "ronald.green@email.com", plan: "Enterprise", joinDate: "2023-09-15", lastActive: "12 minutes ago", wordCount: 505000, images: 1480, serpUsage: 289 },
+  { id: 28, name: "Cynthia Adams", email: "cynthia.adams@email.com", plan: "Free", joinDate: "2024-08-22", lastActive: "9 days ago", wordCount: 5500, images: 6, serpUsage: 2 },
 ];
 
 const userActivityData = [
@@ -103,12 +87,43 @@ const userActivityData = [
 export default function Users() {
   const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [planFilter, setPlanFilter] = useState("all");
+  const [activityFilter, setActivityFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("words-desc");
 
   const toggleUserSelection = (userId: number) => {
     setSelectedUsers((prev) =>
       prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
   };
+
+  const isUserActive = (lastActive: string) => {
+    const activePatterns = ["minute", "hour", "minutes ago", "hours ago"];
+    return activePatterns.some(pattern => lastActive.toLowerCase().includes(pattern));
+  };
+
+  const filteredAndSortedUsers = mockUsers
+    .filter(user => {
+      const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesPlan = planFilter === "all" || user.plan.toLowerCase() === planFilter;
+      const matchesActivity = activityFilter === "all" || 
+                             (activityFilter === "active" && isUserActive(user.lastActive)) ||
+                             (activityFilter === "inactive" && !isUserActive(user.lastActive));
+      return matchesSearch && matchesPlan && matchesActivity;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "words-desc": return b.wordCount - a.wordCount;
+        case "words-asc": return a.wordCount - b.wordCount;
+        case "images-desc": return b.images - a.images;
+        case "images-asc": return a.images - b.images;
+        case "serp-desc": return b.serpUsage - a.serpUsage;
+        case "serp-asc": return a.serpUsage - b.serpUsage;
+        default: return 0;
+      }
+    });
 
   return (
     <div className="space-y-6">
@@ -128,9 +143,14 @@ export default function Users() {
           <div className="grid gap-4 md:grid-cols-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search users..." className="pl-10" />
+              <Input 
+                placeholder="Search users..." 
+                className="pl-10" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-            <Select>
+            <Select value={planFilter} onValueChange={setPlanFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Plan Type" />
               </SelectTrigger>
@@ -141,7 +161,7 @@ export default function Users() {
                 <SelectItem value="enterprise">Enterprise</SelectItem>
               </SelectContent>
             </Select>
-            <Select>
+            <Select value={activityFilter} onValueChange={setActivityFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Activity Status" />
               </SelectTrigger>
@@ -151,7 +171,7 @@ export default function Users() {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            <Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger>
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
@@ -196,10 +216,10 @@ export default function Users() {
               <TableRow>
                 <TableHead className="w-12">
                   <Checkbox
-                    checked={selectedUsers.length === mockUsers.length}
+                    checked={selectedUsers.length === filteredAndSortedUsers.length && filteredAndSortedUsers.length > 0}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setSelectedUsers(mockUsers.map((u) => u.id));
+                        setSelectedUsers(filteredAndSortedUsers.map((u) => u.id));
                       } else {
                         setSelectedUsers([]);
                       }
@@ -218,7 +238,7 @@ export default function Users() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockUsers.map((user) => (
+              {filteredAndSortedUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <Checkbox
