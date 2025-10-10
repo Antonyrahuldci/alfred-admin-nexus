@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 189 92% 10%;
 
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -17,7 +17,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 217 91% 60%;
+    --primary: 134 49% 54%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 217 91% 55%;
 
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 217 91% 60%;
+    --accent: 134 49% 54%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -41,17 +41,17 @@ All colors MUST be HSL.
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 217 91% 60%;
+    --ring: 134 49% 54%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 189 92% 10%;
+    --sidebar-primary: 134 49% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent: 134 49% 54%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
+    --sidebar-border: 20 6% 90%;
     --sidebar-ring: 217 91% 60%;
 
     /* Gradients */
@@ -76,4 +76,37 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+}
+header{
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+/* Apply thin, light green scrollbars with no arrows */
+.custom-scrollbar {
+  margin-top: 15px;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #51C36C transparent; /* thumb + track */
+  overflow-y: auto; /* ensure scrolling */
+  padding-right: 20px;
+}
+
+/* Chrome, Edge, Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #51C36C;
+  border-radius: 3px;
+  border: 0;
+}
+
+/* Remove old-style buttons just in case */
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
