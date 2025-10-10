@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { UserCog, Shield, Bell, Settings } from "lucide-react";
-import { Badge } from "@/components/ui/badge";import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Badge } from "@/components/ui/badge";
 
 const adminUsers = [
 { email: "admin@simbli.com", role: "Super Admin", status: "active", lastLogin: "2024-01-15 14:23" },
@@ -21,196 +21,196 @@ const rolePermissions = [
 
 export default function AdminControls() {
   return (
-    _jsxs("div", { className: "space-y-6", children: [
-      _jsxs("div", { children: [
-        _jsx("h1", { className: "text-3xl font-bold text-foreground", children: "Admin Controls" }),
-        _jsx("p", { className: "text-muted-foreground", children: "Manage admin access and system settings" })] }
-      ),
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Admin Controls</h1>
+        <p className="text-muted-foreground">Manage admin access and system settings</p>
+      </div>
 
-      _jsxs(Card, { children: [
-        _jsx(CardHeader, { children:
-          _jsx("div", { className: "flex items-center justify-between", children:
-            _jsxs(CardTitle, { className: "flex items-center gap-2", children: [
-              _jsx(UserCog, { className: "h-5 w-5 text-primary" }), "Manual Credit Adjustment"] }
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <UserCog className="h-5 w-5 text-primary" />
+              Manual Credit Adjustment
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">User Email</label>
+              <Input placeholder="user@email.com" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Credit Amount</label>
+              <Input type="number" placeholder="1000" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Adjustment Type</label>
+              <Select defaultValue="add">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="add">Add Credits</SelectItem>
+                  <SelectItem value="subtract">Subtract Credits</SelectItem>
+                  <SelectItem value="set">Set Total Credits</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Reason for Adjustment</label>
+            <Input placeholder="e.g., Customer support compensation" />
+          </div>
+          <Button>Apply Credit Adjustment</Button>
+        </CardContent>
+      </Card>
 
-            ) }
-          ) }
-        ),
-        _jsxs(CardContent, { className: "space-y-4", children: [
-          _jsxs("div", { className: "grid gap-4 md:grid-cols-3", children: [
-            _jsxs("div", { className: "space-y-2", children: [
-              _jsx("label", { className: "text-sm font-medium", children: "User Email" }),
-              _jsx(Input, { placeholder: "user@email.com" })] }
-            ),
-            _jsxs("div", { className: "space-y-2", children: [
-              _jsx("label", { className: "text-sm font-medium", children: "Credit Amount" }),
-              _jsx(Input, { type: "number", placeholder: "1000" })] }
-            ),
-            _jsxs("div", { className: "space-y-2", children: [
-              _jsx("label", { className: "text-sm font-medium", children: "Adjustment Type" }),
-              _jsxs(Select, { defaultValue: "add", children: [
-                _jsx(SelectTrigger, { children:
-                  _jsx(SelectValue, {}) }
-                ),
-                _jsxs(SelectContent, { children: [
-                  _jsx(SelectItem, { value: "add", children: "Add Credits" }),
-                  _jsx(SelectItem, { value: "subtract", children: "Subtract Credits" }),
-                  _jsx(SelectItem, { value: "set", children: "Set Total Credits" })] }
-                )] }
-              )] }
-            )] }
-          ),
-          _jsxs("div", { className: "space-y-2", children: [
-            _jsx("label", { className: "text-sm font-medium", children: "Reason for Adjustment" }),
-            _jsx(Input, { placeholder: "e.g., Customer support compensation" })] }
-          ),
-          _jsx(Button, { children: "Apply Credit Adjustment" })] }
-        )] }
-      ),
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            Admin Users & Roles
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3 mb-4">
+            {adminUsers.map((admin, idx) => (
+              <div key={idx} className="flex items-center justify-between p-4 rounded-lg border border-border">
+                <div>
+                  <p className="font-medium">{admin.email}</p>
+                  <p className="text-sm text-muted-foreground">Last login: {admin.lastLogin}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge>{admin.role}</Badge>
+                  <Badge variant={admin.status === "active" ? "default" : "secondary"}>
+                    {admin.status}
+                  </Badge>
+                  <Button size="sm" variant="outline">Edit</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button variant="outline">Add New Admin</Button>
+        </CardContent>
+      </Card>
 
-      _jsxs(Card, { children: [
-        _jsx(CardHeader, { children:
-          _jsxs(CardTitle, { className: "flex items-center gap-2", children: [
-            _jsx(Shield, { className: "h-5 w-5 text-primary" }), "Admin Users & Roles"] }
+      <Card>
+        <CardHeader>
+          <CardTitle>Role-Based Access Permissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-3 font-medium">Role</th>
+                  <th className="text-center p-3 font-medium">Users</th>
+                  <th className="text-center p-3 font-medium">Manage Users</th>
+                  <th className="text-center p-3 font-medium">View Analytics</th>
+                  <th className="text-center p-3 font-medium">Manage Payments</th>
+                  <th className="text-center p-3 font-medium">System Settings</th>
+                  <th className="text-center p-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rolePermissions.map((role, idx) => (
+                  <tr key={idx} className="border-b">
+                    <td className="p-3 font-medium">{role.role}</td>
+                    <td className="p-3 text-center">{role.users}</td>
+                    <td className="p-3 text-center">
+                      <Switch checked={role.manageUsers} disabled />
+                    </td>
+                    <td className="p-3 text-center">
+                      <Switch checked={role.viewAnalytics} disabled />
+                    </td>
+                    <td className="p-3 text-center">
+                      <Switch checked={role.managePayments} disabled />
+                    </td>
+                    <td className="p-3 text-center">
+                      <Switch checked={role.systemSettings} disabled />
+                    </td>
+                    <td className="p-3 text-center">
+                      <Button size="sm" variant="outline">Edit</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
-          ) }
-        ),
-        _jsxs(CardContent, { children: [
-          _jsx("div", { className: "space-y-3 mb-4", children:
-            adminUsers.map((admin, idx) =>
-            _jsxs("div", { className: "flex items-center justify-between p-4 rounded-lg border border-border", children: [
-              _jsxs("div", { children: [
-                _jsx("p", { className: "font-medium", children: admin.email }),
-                _jsxs("p", { className: "text-sm text-muted-foreground", children: ["Last login: ", admin.lastLogin] })] }
-              ),
-              _jsxs("div", { className: "flex items-center gap-3", children: [
-                _jsx(Badge, { children: admin.role }),
-                _jsx(Badge, { variant: admin.status === "active" ? "default" : "secondary", children:
-                  admin.status }
-                ),
-                _jsx(Button, { size: "sm", variant: "outline", children: "Edit" })] }
-              )] }, idx
-            )
-            ) }
-          ),
-          _jsx(Button, { variant: "outline", children: "Add New Admin" })] }
-        )] }
-      ),
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-primary" />
+            Notification Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+            <div>
+              <p className="font-medium">Low Credit Alerts</p>
+              <p className="text-sm text-muted-foreground">Notify users when credits fall below threshold</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+            <div>
+              <p className="font-medium">Renewal Reminders</p>
+              <p className="text-sm text-muted-foreground">Send email reminders 7 days before renewal</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+            <div>
+              <p className="font-medium">Feature Announcements</p>
+              <p className="text-sm text-muted-foreground">Notify users about new features and updates</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+            <div>
+              <p className="font-medium">Usage Milestone Alerts</p>
+              <p className="text-sm text-muted-foreground">Celebrate user milestones (e.g., 10,000 words generated)</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+        </CardContent>
+      </Card>
 
-      _jsxs(Card, { children: [
-        _jsx(CardHeader, { children:
-          _jsx(CardTitle, { children: "Role-Based Access Permissions" }) }
-        ),
-        _jsx(CardContent, { children:
-          _jsx("div", { className: "overflow-x-auto", children:
-            _jsxs("table", { className: "w-full", children: [
-              _jsx("thead", { children:
-                _jsxs("tr", { className: "border-b", children: [
-                  _jsx("th", { className: "text-left p-3 font-medium", children: "Role" }),
-                  _jsx("th", { className: "text-center p-3 font-medium", children: "Users" }),
-                  _jsx("th", { className: "text-center p-3 font-medium", children: "Manage Users" }),
-                  _jsx("th", { className: "text-center p-3 font-medium", children: "View Analytics" }),
-                  _jsx("th", { className: "text-center p-3 font-medium", children: "Manage Payments" }),
-                  _jsx("th", { className: "text-center p-3 font-medium", children: "System Settings" }),
-                  _jsx("th", { className: "text-center p-3 font-medium", children: "Actions" })] }
-                ) }
-              ),
-              _jsx("tbody", { children:
-                rolePermissions.map((role, idx) =>
-                _jsxs("tr", { className: "border-b", children: [
-                  _jsx("td", { className: "p-3 font-medium", children: role.role }),
-                  _jsx("td", { className: "p-3 text-center", children: role.users }),
-                  _jsx("td", { className: "p-3 text-center", children:
-                    _jsx(Switch, { checked: role.manageUsers, disabled: true }) }
-                  ),
-                  _jsx("td", { className: "p-3 text-center", children:
-                    _jsx(Switch, { checked: role.viewAnalytics, disabled: true }) }
-                  ),
-                  _jsx("td", { className: "p-3 text-center", children:
-                    _jsx(Switch, { checked: role.managePayments, disabled: true }) }
-                  ),
-                  _jsx("td", { className: "p-3 text-center", children:
-                    _jsx(Switch, { checked: role.systemSettings, disabled: true }) }
-                  ),
-                  _jsx("td", { className: "p-3 text-center", children:
-                    _jsx(Button, { size: "sm", variant: "outline", children: "Edit" }) }
-                  )] }, idx
-                )
-                ) }
-              )] }
-            ) }
-          ) }
-        )] }
-      ),
-
-      _jsxs(Card, { children: [
-        _jsx(CardHeader, { children:
-          _jsxs(CardTitle, { className: "flex items-center gap-2", children: [
-            _jsx(Bell, { className: "h-5 w-5 text-primary" }), "Notification Settings"] }
-
-          ) }
-        ),
-        _jsxs(CardContent, { className: "space-y-4", children: [
-          _jsxs("div", { className: "flex items-center justify-between p-4 rounded-lg border border-border", children: [
-            _jsxs("div", { children: [
-              _jsx("p", { className: "font-medium", children: "Low Credit Alerts" }),
-              _jsx("p", { className: "text-sm text-muted-foreground", children: "Notify users when credits fall below threshold" })] }
-            ),
-            _jsx(Switch, { defaultChecked: true })] }
-          ),
-          _jsxs("div", { className: "flex items-center justify-between p-4 rounded-lg border border-border", children: [
-            _jsxs("div", { children: [
-              _jsx("p", { className: "font-medium", children: "Renewal Reminders" }),
-              _jsx("p", { className: "text-sm text-muted-foreground", children: "Send email reminders 7 days before renewal" })] }
-            ),
-            _jsx(Switch, { defaultChecked: true })] }
-          ),
-          _jsxs("div", { className: "flex items-center justify-between p-4 rounded-lg border border-border", children: [
-            _jsxs("div", { children: [
-              _jsx("p", { className: "font-medium", children: "Feature Announcements" }),
-              _jsx("p", { className: "text-sm text-muted-foreground", children: "Notify users about new features and updates" })] }
-            ),
-            _jsx(Switch, { defaultChecked: true })] }
-          ),
-          _jsxs("div", { className: "flex items-center justify-between p-4 rounded-lg border border-border", children: [
-            _jsxs("div", { children: [
-              _jsx("p", { className: "font-medium", children: "Usage Milestone Alerts" }),
-              _jsx("p", { className: "text-sm text-muted-foreground", children: "Celebrate user milestones (e.g., 10,000 words generated)" })] }
-            ),
-            _jsx(Switch, { defaultChecked: true })] }
-          )] }
-        )] }
-      ),
-
-      _jsxs(Card, { children: [
-        _jsx(CardHeader, { children:
-          _jsxs(CardTitle, { className: "flex items-center gap-2", children: [
-            _jsx(Settings, { className: "h-5 w-5 text-primary" }), "System Configuration"] }
-
-          ) }
-        ),
-        _jsxs(CardContent, { className: "space-y-4", children: [
-          _jsxs("div", { className: "grid gap-4 md:grid-cols-2", children: [
-            _jsxs("div", { className: "space-y-2", children: [
-              _jsx("label", { className: "text-sm font-medium", children: "Default Credit Allocation (Free Plan)" }),
-              _jsx(Input, { type: "number", defaultValue: "1000" })] }
-            ),
-            _jsxs("div", { className: "space-y-2", children: [
-              _jsx("label", { className: "text-sm font-medium", children: "Default Credit Allocation (Pro Plan)" }),
-              _jsx(Input, { type: "number", defaultValue: "10000" })] }
-            ),
-            _jsxs("div", { className: "space-y-2", children: [
-              _jsx("label", { className: "text-sm font-medium", children: "Default Credit Allocation (Enterprise Plan)" }),
-              _jsx(Input, { type: "number", defaultValue: "50000" })] }
-            ),
-            _jsxs("div", { className: "space-y-2", children: [
-              _jsx("label", { className: "text-sm font-medium", children: "Credit Depletion Warning Threshold (%)" }),
-              _jsx(Input, { type: "number", defaultValue: "20" })] }
-            )] }
-          ),
-          _jsx(Button, { children: "Save Configuration" })] }
-        )] }
-      )] }
-    ));
-
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5 text-primary" />
+            System Configuration
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Default Credit Allocation (Free Plan)</label>
+              <Input type="number" defaultValue="1000" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Default Credit Allocation (Pro Plan)</label>
+              <Input type="number" defaultValue="10000" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Default Credit Allocation (Enterprise Plan)</label>
+              <Input type="number" defaultValue="50000" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Credit Depletion Warning Threshold (%)</label>
+              <Input type="number" defaultValue="20" />
+            </div>
+          </div>
+          <Button>Save Configuration</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
