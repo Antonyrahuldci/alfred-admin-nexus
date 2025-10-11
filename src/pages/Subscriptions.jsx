@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/table";
 import { DollarSign, Users, TrendingUp } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import CouponModal from "./CouponModal";
+import { useState } from "react";
 
 const plans = [
   { name: "Free", price: "$0", subscribers: 2134, revenue: 0 },
@@ -69,6 +71,8 @@ const paymentHistory = [
 ];
 
 export default function Subscriptions() {
+  const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -98,7 +102,9 @@ export default function Subscriptions() {
                 <span className="text-2xl font-bold">
                   {plan.subscribers.toLocaleString()}
                 </span>
-                <span className="text-sm text-muted-foreground">subscribers</span>
+                <span className="text-sm text-muted-foreground">
+                  subscribers
+                </span>
               </div>
               {plan.revenue > 0 && (
                 <div className="flex items-center gap-2">
@@ -130,7 +136,9 @@ export default function Subscriptions() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name}: $${value.toLocaleString()}`}
+                  label={({ name, value }) =>
+                    `${name}: $${value.toLocaleString()}`
+                  }
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
@@ -159,7 +167,7 @@ export default function Subscriptions() {
             <CardTitle>Coupon Management</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
+            <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
               <div className="flex items-center justify-between rounded-lg border border-border p-3">
                 <div>
                   <p className="font-medium">SUMMER20</p>
@@ -178,8 +186,57 @@ export default function Subscriptions() {
                 </div>
                 <Badge variant="secondary">Expired</Badge>
               </div>
+              <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div>
+                  <p className="font-medium">WELCOME10</p>
+                  <p className="text-sm text-muted-foreground">
+                    $10 off first purchase
+                  </p>
+                </div>
+                <Badge>Active</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div>
+                  <p className="font-medium">BLACKFRIDAY</p>
+                  <p className="text-sm text-muted-foreground">
+                    30% off for Black Friday
+                  </p>
+                </div>
+                <Badge variant="secondary">Expired</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div>
+                  <p className="font-medium">STUDENT15</p>
+                  <p className="text-sm text-muted-foreground">
+                    15% off for students
+                  </p>
+                </div>
+                <Badge>Active</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div>
+                  <p className="font-medium">LOYALTY25</p>
+                  <p className="text-sm text-muted-foreground">
+                    25% off for loyal customers
+                  </p>
+                </div>
+                <Badge>Active</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div>
+                  <p className="font-medium">NEWYEAR50</p>
+                  <p className="text-sm text-muted-foreground">
+                    50% off New Year special
+                  </p>
+                </div>
+                <Badge variant="secondary">Expired</Badge>
+              </div>
             </div>
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsCouponModalOpen(true)}
+            >
               Create New Coupon
             </Button>
           </CardContent>
@@ -213,7 +270,9 @@ export default function Subscriptions() {
                   <TableCell>
                     <Badge
                       variant={
-                        payment.status === "Completed" ? "default" : "destructive"
+                        payment.status === "Completed"
+                          ? "default"
+                          : "destructive"
                       }
                     >
                       {payment.status}
@@ -225,6 +284,10 @@ export default function Subscriptions() {
           </Table>
         </CardContent>
       </Card>
+      <CouponModal
+        isOpen={isCouponModalOpen}
+        onClose={() => setIsCouponModalOpen(false)}
+      />
     </div>
   );
 }
