@@ -192,3 +192,19 @@ header {
   padding: 60px;
 
 }
+.Model_popups{
+  border-radius: 15px;
+}
+@media(max-width:450px){
+  .Model_popups{
+  max-width: 360px;
+  width: 100%;
+  border-radius: 15px;
+}
+.custom-scrollbar{
+  padding-right: 5px;
+  margin-top: 2px;
+  scrollbar-width: none;
+
+}
+}

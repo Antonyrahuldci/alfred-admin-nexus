@@ -462,70 +462,72 @@ export default function Users() {
       </div>
 
       {/* Add User Modal */}
-      <Dialog open={open} onOpenChange={setOpen} className="Model_Content">
-        <DialogContent className="sm:max-w-md Model_popups">
-          <DialogHeader>
-            <DialogTitle className="Add_user">Add User</DialogTitle>
-          </DialogHeader>
+      <div className="m-3 ">
+        <Dialog open={open} onOpenChange={setOpen} className="Model_Content m-3">
+          <DialogContent className=" Model_popups " >
+            <DialogHeader>
+              <DialogTitle className="Add_user">Add User</DialogTitle>
+            </DialogHeader>
 
-          <div className="space-y-4 mt-2 px-1">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Username</label>
-              <div className="input-wrapper d-flex align-items-center mt-4">
-                <input
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
-                />
+            <div className="space-y-4 mt-2 px-1">
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Username</label>
+                <div className="input-wrapper d-flex align-items-center mt-4">
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter username"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Email</label>
+                <div className="input-wrapper d-flex align-items-center mt-4">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter email"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">
+                  Password <span className="text-red-500"> (Temporary password)</span>
+                </label>
+                <div className="input-wrapper d-flex align-items-center mt-4">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Auto generated"
+                  />
+                  <i
+                    onClick={togglePassword}
+                    className={
+                      showPassword
+                        ? "fa fa-eye-slash Eye_Color"
+                        : "fa fa-eye Eye_Color"
+                    }
+                    style={{ marginLeft: "8px", cursor: "pointer" }}
+                  ></i>
+                </div>
               </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Email</label>
-              <div className="input-wrapper d-flex align-items-center mt-4">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter email"
-                />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">
-                Password <span className="text-red-500"> (Temporary password)</span>
-              </label>
-              <div className="input-wrapper d-flex align-items-center mt-4">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Auto generated"
-                />
-                <i
-                  onClick={togglePassword}
-                  className={
-                    showPassword
-                      ? "fa fa-eye-slash Eye_Color"
-                      : "fa fa-eye Eye_Color"
-                  }
-                  style={{ marginLeft: "8px", cursor: "pointer" }}
-                ></i>
-              </div>
-            </div>
-          </div>
 
-          <div className="mt-6 flex justify-end gap-2">
-            <DialogClose asChild>
-              <button variant="outline" className="Cancel_btn">
-                Cancel
+            <div className="mt-6 flex justify-end gap-2">
+              <DialogClose asChild>
+                <button variant="outline" className="Cancel_btn">
+                  Cancel
+                </button>
+              </DialogClose>
+              <button onClick={handleAdd} className="Add_Btn">
+                Add User
               </button>
-            </DialogClose>
-            <button onClick={handleAdd} className="Add_Btn">
-              Add User
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <Card>
         <CardHeader>
@@ -655,8 +657,8 @@ export default function Users() {
                         user.plan === "Enterprise"
                           ? "default"
                           : user.plan === "Pro"
-                          ? "default"
-                          : "secondary"
+                            ? "default"
+                            : "secondary"
                       }
                     >
                       {user.plan}
@@ -686,7 +688,7 @@ export default function Users() {
                           <Eye className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl">
+                      <DialogContent className="max-w-3xl Model_popups">
                         <DialogHeader>
                           <DialogTitle>User Details: {user.name}</DialogTitle>
                         </DialogHeader>
