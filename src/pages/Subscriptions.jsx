@@ -12,18 +12,16 @@ import {
 import { DollarSign, Users, TrendingUp } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CouponModal from "./CouponModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import apiFunctions from "@/api/apiFunctions";
 
-const plans = [
-  { name: "Free", price: "$0", subscribers: 2134, revenue: 0 },
-  { name: "Pro", price: "$29", subscribers: 2456, revenue: 71224 },
-  { name: "Enterprise", price: "$99", subscribers: 644, revenue: 63756 },
-];
+// const plans = [
+//   { name: "Free", price: "$0", subscribers: 2134, revenue: 0 },
+//   { name: "Pro", price: "$29", subscribers: 2456, revenue: 71224 },
+//   { name: "Enterprise", price: "$99", subscribers: 644, revenue: 63756 },
+// ];
 
-const revenueByPlan = [
-  { name: "Pro", value: 71224 },
-  { name: "Enterprise", value: 63756 },
-];
+// This will be calculated dynamically from the API data
 
 const COLORS = ["hsl(217 91% 60%)", "hsl(142 76% 36%)"];
 
@@ -72,6 +70,30 @@ const paymentHistory = [
 
 export default function Subscriptions() {
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+
+  const [plans, setPlans] = useState([]);
+  const getUserPlansDataApi = async () => {
+    const response = await apiFunctions.getUserPlansData();
+    console.log(response.data.data);
+    if (response.data.status === 200) {
+      // Convert paisa to rupees (divide by 100)
+      const convertedPlans = response.data.data.map(plan => ({
+        ...plan,
+        revenue: Math.round(plan.revenue / 100), // Convert paisa to rupees
+        price: `₹${Math.round(parseInt(plan.price.replace('$', '')) / 100)}` // Convert price from paisa to rupees and change symbol
+      }));
+      setPlans(convertedPlans);
+    }
+  };
+  useEffect(() => {
+    getUserPlansDataApi();
+  }, []);
+
+  // Filter plans with revenue > 0 for the pie chart
+  const revenueByPlan = plans.filter(plan => plan.revenue > 0).map(plan => ({
+    name: plan.name,
+    value: plan.revenue
+  }));
 
   return (
     <div className="space-y-6">

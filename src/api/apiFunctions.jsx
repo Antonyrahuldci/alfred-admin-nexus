@@ -1,3 +1,4 @@
+import { appConstants } from "../constants/appConstants";
 import method from "./method";
 const apiFunctions = {
   login: (payload) => method.post("/login", payload),
@@ -34,6 +35,15 @@ const apiFunctions = {
   getUserDetails: (userId) => method.get(`/users/${userId}`),
   getUsageSummary: (userId) => method.get(`https://backend-alfred.simbli.ai/usage/summary/${userId}`),
   sendCoupon: (payload) => method.post("/send_coupon", payload),
+
+  //newAdmin
+
+  getUsersGrowth: (timeRange) => method.get(`${appConstants?.newAdminBaseUrl}/new-users-growth?timeRange=${timeRange}`),
+  getUsersGrowthMonthly: () => method.get(`${appConstants?.newAdminBaseUrl}/monthly-user-growth`),
+  getMonthlyRevenue: () => method.get(`${appConstants?.newAdminBaseUrl}/monthly-revenue`),
+  getRecentActivity: (limit) => method.get(`${appConstants?.newAdminBaseUrl}/recent-activity?limit=${limit || 10}`),
+  getMockUser: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/users-with-usage?page=${page || 1}&limit=${limit || 10}`),
+  getUserPlansData: () => method.get(`${appConstants?.newAdminBaseUrl}/subscription-plans-with-revenue`)
 };
 
 export default apiFunctions;

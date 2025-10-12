@@ -16,24 +16,26 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+import { useEffect, useState } from "react";
+import apiFunctions from "../api/apiFunctions";
 
-const userGrowthData = [
-  { month: "Jan", users: 1200 },
-  { month: "Feb", users: 1800 },
-  { month: "Mar", users: 2400 },
-  { month: "Apr", users: 3200 },
-  { month: "May", users: 4100 },
-  { month: "Jun", users: 5200 }
-];
+// const userGrowthData = [
+//   { month: "Jan", users: 1200 },
+//   { month: "Feb", users: 1800 },
+//   { month: "Mar", users: 2400 },
+//   { month: "Apr", users: 3200 },
+//   { month: "May", users: 4100 },
+//   { month: "Jun", users: 5200 }
+// ];
 
-const revenueData = [
-  { month: "Jan", revenue: 12000 },
-  { month: "Feb", revenue: 18000 },
-  { month: "Mar", revenue: 24000 },
-  { month: "Apr", revenue: 32000 },
-  { month: "May", revenue: 41000 },
-  { month: "Jun", revenue: 52000 }
-];
+// const revenueData = [
+//   { month: "Jan", revenue: 12000 },
+//   { month: "Feb", revenue: 18000 },
+//   { month: "Mar", revenue: 24000 },
+//   { month: "Apr", revenue: 32000 },
+//   { month: "May", revenue: 41000 },
+//   { month: "Jun", revenue: 52000 }
+// ];
 
 const featureUsageData = [
   { name: "Writing", value: 45 },
@@ -43,15 +45,64 @@ const featureUsageData = [
 
 const COLORS = ["hsl(217 91% 60%)", "hsl(142 76% 36%)", "hsl(38 92% 50%)"];
 
-const recentActivity = [
-  { id: 1, user: "john.doe@email.com", action: "Signed up for Pro plan", time: "2 minutes ago", type: "signup" },
-  { id: 2, user: "jane.smith@email.com", action: "Generated 5,000 words", time: "15 minutes ago", type: "usage" },
-  { id: 3, user: "mike.wilson@email.com", action: "Created 12 AI images", time: "1 hour ago", type: "usage" },
-  { id: 4, user: "sarah.jones@email.com", action: "Upgraded to Enterprise", time: "2 hours ago", type: "upgrade" },
-  { id: 5, user: "alex.brown@email.com", action: "Completed SERP analysis", time: "3 hours ago", type: "usage" }
-];
+// const recentActivity = [
+//   { id: 1, user: "john.doe@email.com", action: "Signed up for Pro plan", time: "2 minutes ago", type: "signup" },
+//   { id: 2, user: "jane.smith@email.com", action: "Generated 5,000 words", time: "15 minutes ago", type: "usage" },
+//   { id: 3, user: "mike.wilson@email.com", action: "Created 12 AI images", time: "1 hour ago", type: "usage" },
+//   { id: 4, user: "sarah.jones@email.com", action: "Upgraded to Enterprise", time: "2 hours ago", type: "upgrade" },
+//   { id: 5, user: "alex.brown@email.com", action: "Completed SERP analysis", time: "3 hours ago", type: "usage" }
+// ];
 
 export default function Overview() {
+  const [userDataMonth , setUserDataMonth]= useState([])
+  const [revenueData , setRevenueData]= useState([])
+  const [recentActivity , setRecentActivity] = useState([])
+ const getUserGrowthMonth = async()=>{
+  try{
+
+    const response = await apiFunctions.getUsersGrowthMonthly()
+    console.log(response.data)
+    if(response.data.status ===200){
+
+      setUserDataMonth(response.data.data)
+    }
+  }catch(err){
+    console.log(err)
+  }
+ }
+ const getRevue = async()=>{
+  try{
+
+    const response = await apiFunctions.getMonthlyRevenue()
+    console.log(response.data)
+    if(response.data.status ===200){
+
+      setRevenueData(response.data.data)
+    }
+  }catch(err){
+    console.log(err)
+  }
+ }
+ const getRecentActivityAPI = async()=>{
+  try{
+
+    const response = await apiFunctions.getRecentActivity()
+    console.log(response.data)
+    if(response.data.status ===200){
+
+      setRecentActivity(response.data.data)
+    }
+  }catch(err){
+    console.log(err)
+  }
+ }
+
+ useEffect(()=>{
+  getUserGrowthMonth()
+  getRevue()
+  getRecentActivityAPI()
+ },[])
+
   return (
     <div className="space-y-6">
       <div>
@@ -118,7 +169,8 @@ export default function Overview() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={userGrowthData}>
+              {/* <LineChart data={userGrowthData}> */}
+              <LineChart data={userDataMonth}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
@@ -138,11 +190,24 @@ export default function Overview() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
+              {/* <BarChart data={revenueData}> */}
               <BarChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem" }} />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))" 
+                  tickFormatter={(value) => {
+                    const inrValue = value / 100;
+                    if (inrValue >= 1000) {
+                      return `₹${(inrValue / 1000).toFixed(1)}k`;
+                    }
+                    return `₹${inrValue}`;
+                  }}
+                />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem" }}
+                  formatter={(value) => [`₹${(value / 100).toLocaleString()}`, 'Revenue']}
+                />
                 <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

@@ -1,16 +1,39 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { Users, Globe, TrendingUp, Activity } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const newUsersData = [
-  { date: "Jan 1", users: 45 },
-  { date: "Jan 8", users: 62 },
-  { date: "Jan 15", users: 78 },
-  { date: "Jan 22", users: 95 },
-  { date: "Jan 29", users: 112 },
-  { date: "Feb 5", users: 134 }
-];
+import { useEffect, useState } from "react";
+import apiFunctions from "../api/apiFunctions";
+
+// const newUsersData = [
+//   { date: "Jan 1", users: 45 },
+//   { date: "Jan 8", users: 62 },
+//   { date: "Jan 15", users: 78 },
+//   { date: "Jan 22", users: 95 },
+//   { date: "Jan 29", users: 112 },
+//   { date: "Feb 5", users: 134 }
+// ];
 
 const topCountriesData = [
   { country: "United States", users: 1845, percent: 35 },
@@ -18,22 +41,29 @@ const topCountriesData = [
   { country: "Canada", users: 634, percent: 12 },
   { country: "Germany", users: 523, percent: 10 },
   { country: "Australia", users: 456, percent: 9 },
-  { country: "Others", users: 884, percent: 17 }
+  { country: "Others", users: 884, percent: 17 },
 ];
 
-const COLORS = ["hsl(217 91% 60%)", "hsl(142 76% 36%)", "hsl(38 92% 50%)", "hsl(280 65% 60%)", "hsl(340 75% 55%)", "hsl(200 70% 50%)"];
+const COLORS = [
+  "hsl(217 91% 60%)",
+  "hsl(142 76% 36%)",
+  "hsl(38 92% 50%)",
+  "hsl(280 65% 60%)",
+  "hsl(340 75% 55%)",
+  "hsl(200 70% 50%)",
+];
 
 const cohortData = [
   { cohort: "Week 1", retained: 100, week2: 85, week3: 72, week4: 65 },
   { cohort: "Week 2", retained: 100, week2: 88, week3: 75, week4: 68 },
   { cohort: "Week 3", retained: 100, week2: 82, week3: 70, week4: 62 },
-  { cohort: "Week 4", retained: 100, week2: 90, week3: 78, week4: 71 }
+  { cohort: "Week 4", retained: 100, week2: 90, week3: 78, week4: 71 },
 ];
 
 const featureAdoptionData = [
   { feature: "AI Writer", day1: 85, day3: 72, day7: 68 },
   { feature: "Image Gen", day1: 62, day3: 55, day7: 48 },
-  { feature: "SERP Tool", day1: 45, day3: 38, day7: 35 }
+  { feature: "SERP Tool", day1: 45, day3: 38, day7: 35 },
 ];
 
 const sessionData = [
@@ -41,14 +71,14 @@ const sessionData = [
   { range: "5-15 min", users: 892 },
   { range: "15-30 min", users: 1245 },
   { range: "30-60 min", users: 734 },
-  { range: "60+ min", users: 423 }
+  { range: "60+ min", users: 423 },
 ];
 
 const funnelData = [
   { stage: "Sign-up", users: 5234, percent: 100 },
   { stage: "First Action", users: 4456, percent: 85 },
   { stage: "3+ Actions", users: 3201, percent: 61 },
-  { stage: "Subscription", users: 1847, percent: 35 }
+  { stage: "Subscription", users: 1847, percent: 35 },
 ];
 
 const topActiveUsers = [
@@ -56,18 +86,47 @@ const topActiveUsers = [
   { name: "sarah.wilson@email.com", credits: 38912, plan: "Pro" },
   { name: "mike.johnson@email.com", credits: 32456, plan: "Enterprise" },
   { name: "emma.brown@email.com", credits: 28734, plan: "Pro" },
-  { name: "alex.davis@email.com", credits: 24123, plan: "Pro" }
+  { name: "alex.davis@email.com", credits: 24123, plan: "Pro" },
 ];
 
 export default function UserAnalytics() {
+  const [growthData, setGrowthData] = useState([]);
+  const [timeRange, setTimeRange] = useState("30days");
+  
+  const userGrowthAPI = async (selectedTimeRange = timeRange) => {
+    try {
+      // Map frontend time range values to backend expected values
+      const timeRangeMap = {
+        "7days": "7",
+        "30days": "30", 
+        "90days": "90"
+      };
+      
+      const backendTimeRange = timeRangeMap[selectedTimeRange] || "30";
+      const response = await apiFunctions.getUsersGrowth(backendTimeRange);
+      console.log(response);
+      if (response.data.status === 200) {
+        setGrowthData(response.data.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    userGrowthAPI();
+  }, [timeRange]);
+  console.log("growthData", growthData);
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">User Analytics</h1>
-          <p className="text-muted-foreground">Detailed user behavior and engagement metrics</p>
+          <p className="text-muted-foreground">
+            Detailed user behavior and engagement metrics
+          </p>
         </div>
-        <Select defaultValue="30days">
+        <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue />
           </SelectTrigger>
@@ -89,12 +148,27 @@ export default function UserAnalytics() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={newUsersData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              {/* <LineChart data={newUsersData}> */}
+              <LineChart data={growthData}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
                 <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem" }} />
-                <Line type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="users"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -121,10 +195,19 @@ export default function UserAnalytics() {
                   dataKey="users"
                 >
                   {topCountriesData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -245,12 +328,17 @@ export default function UserAnalytics() {
           <CardContent>
             <div className="space-y-3">
               {topActiveUsers.map((user, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-3 rounded-lg border border-border"
+                >
                   <div>
                     <p className="font-medium">{user.name}</p>
                     <p className="text-sm text-muted-foreground">{user.plan}</p>
                   </div>
-                  <span className="font-bold text-primary">{user.credits.toLocaleString()}</span>
+                  <span className="font-bold text-primary">
+                    {user.credits.toLocaleString()}
+                  </span>
                 </div>
               ))}
             </div>

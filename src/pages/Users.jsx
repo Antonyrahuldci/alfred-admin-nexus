@@ -29,6 +29,7 @@ import {
 import { Search, Eye } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import Pagination from "@/components/Pagination/Pagination.jsx";
 import {
   LineChart,
   Line,
@@ -38,317 +39,318 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import apiFunctions from "../api/apiFunctions";
 
-const mockUsers = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@email.com",
-    plan: "Pro",
-    joinDate: "2024-01-15",
-    lastActive: "2 hours ago",
-    wordCount: 125000,
-    images: 450,
-    serpUsage: 89,
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane.smith@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-11-20",
-    lastActive: "5 minutes ago",
-    wordCount: 450000,
-    images: 1200,
-    serpUsage: 234,
-  },
-  {
-    id: 3,
-    name: "Mike Wilson",
-    email: "mike.wilson@email.com",
-    plan: "Free",
-    joinDate: "2024-05-10",
-    lastActive: "1 day ago",
-    wordCount: 15000,
-    images: 25,
-    serpUsage: 12,
-  },
-  {
-    id: 4,
-    name: "Sarah Jones",
-    email: "sarah.jones@email.com",
-    plan: "Pro",
-    joinDate: "2024-02-28",
-    lastActive: "3 hours ago",
-    wordCount: 275000,
-    images: 680,
-    serpUsage: 145,
-  },
-  {
-    id: 5,
-    name: "David Brown",
-    email: "david.brown@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-12-05",
-    lastActive: "1 hour ago",
-    wordCount: 380000,
-    images: 950,
-    serpUsage: 198,
-  },
-  {
-    id: 6,
-    name: "Emily Davis",
-    email: "emily.davis@email.com",
-    plan: "Pro",
-    joinDate: "2024-03-18",
-    lastActive: "30 minutes ago",
-    wordCount: 195000,
-    images: 520,
-    serpUsage: 112,
-  },
-  {
-    id: 7,
-    name: "Chris Martin",
-    email: "chris.martin@email.com",
-    plan: "Free",
-    joinDate: "2024-06-22",
-    lastActive: "5 days ago",
-    wordCount: 8500,
-    images: 15,
-    serpUsage: 7,
-  },
-  {
-    id: 8,
-    name: "Amanda White",
-    email: "amanda.white@email.com",
-    plan: "Pro",
-    joinDate: "2024-01-30",
-    lastActive: "4 hours ago",
-    wordCount: 215000,
-    images: 585,
-    serpUsage: 128,
-  },
-  {
-    id: 9,
-    name: "Robert Taylor",
-    email: "robert.taylor@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-10-15",
-    lastActive: "15 minutes ago",
-    wordCount: 520000,
-    images: 1450,
-    serpUsage: 276,
-  },
-  {
-    id: 10,
-    name: "Lisa Anderson",
-    email: "lisa.anderson@email.com",
-    plan: "Free",
-    joinDate: "2024-07-08",
-    lastActive: "3 days ago",
-    wordCount: 12000,
-    images: 18,
-    serpUsage: 9,
-  },
-  {
-    id: 11,
-    name: "James Thomas",
-    email: "james.thomas@email.com",
-    plan: "Pro",
-    joinDate: "2024-02-14",
-    lastActive: "1 hour ago",
-    wordCount: 245000,
-    images: 620,
-    serpUsage: 138,
-  },
-  {
-    id: 12,
-    name: "Jessica Moore",
-    email: "jessica.moore@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-09-28",
-    lastActive: "20 minutes ago",
-    wordCount: 475000,
-    images: 1380,
-    serpUsage: 265,
-  },
-  {
-    id: 13,
-    name: "Daniel Jackson",
-    email: "daniel.jackson@email.com",
-    plan: "Free",
-    joinDate: "2024-08-01",
-    lastActive: "2 days ago",
-    wordCount: 9500,
-    images: 12,
-    serpUsage: 5,
-  },
-  {
-    id: 14,
-    name: "Michelle Lee",
-    email: "michelle.lee@email.com",
-    plan: "Pro",
-    joinDate: "2024-04-05",
-    lastActive: "6 hours ago",
-    wordCount: 185000,
-    images: 495,
-    serpUsage: 105,
-  },
-  {
-    id: 15,
-    name: "Kevin Harris",
-    email: "kevin.harris@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-11-10",
-    lastActive: "10 minutes ago",
-    wordCount: 425000,
-    images: 1150,
-    serpUsage: 228,
-  },
-  {
-    id: 16,
-    name: "Rachel Clark",
-    email: "rachel.clark@email.com",
-    plan: "Free",
-    joinDate: "2024-06-15",
-    lastActive: "4 days ago",
-    wordCount: 11000,
-    images: 20,
-    serpUsage: 8,
-  },
-  {
-    id: 17,
-    name: "Brian Lewis",
-    email: "brian.lewis@email.com",
-    plan: "Pro",
-    joinDate: "2024-03-22",
-    lastActive: "2 hours ago",
-    wordCount: 205000,
-    images: 545,
-    serpUsage: 118,
-  },
-  {
-    id: 18,
-    name: "Nicole Walker",
-    email: "nicole.walker@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-08-19",
-    lastActive: "25 minutes ago",
-    wordCount: 495000,
-    images: 1425,
-    serpUsage: 282,
-  },
-  {
-    id: 19,
-    name: "Steven Hall",
-    email: "steven.hall@email.com",
-    plan: "Free",
-    joinDate: "2024-07-20",
-    lastActive: "6 days ago",
-    wordCount: 7200,
-    images: 10,
-    serpUsage: 4,
-  },
-  {
-    id: 20,
-    name: "Karen Allen",
-    email: "karen.allen@email.com",
-    plan: "Pro",
-    joinDate: "2024-01-25",
-    lastActive: "5 hours ago",
-    wordCount: 235000,
-    images: 605,
-    serpUsage: 132,
-  },
-  {
-    id: 21,
-    name: "Gary Young",
-    email: "gary.young@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-12-18",
-    lastActive: "35 minutes ago",
-    wordCount: 410000,
-    images: 1090,
-    serpUsage: 215,
-  },
-  {
-    id: 22,
-    name: "Patricia King",
-    email: "patricia.king@email.com",
-    plan: "Free",
-    joinDate: "2024-08-10",
-    lastActive: "8 days ago",
-    wordCount: 6800,
-    images: 8,
-    serpUsage: 3,
-  },
-  {
-    id: 23,
-    name: "Timothy Wright",
-    email: "timothy.wright@email.com",
-    plan: "Pro",
-    joinDate: "2024-04-12",
-    lastActive: "1 hour ago",
-    wordCount: 225000,
-    images: 595,
-    serpUsage: 125,
-  },
-  {
-    id: 24,
-    name: "Sharon Lopez",
-    email: "sharon.lopez@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-10-30",
-    lastActive: "45 minutes ago",
-    wordCount: 465000,
-    images: 1320,
-    serpUsage: 252,
-  },
-  {
-    id: 25,
-    name: "Edward Hill",
-    email: "edward.hill@email.com",
-    plan: "Free",
-    joinDate: "2024-07-28",
-    lastActive: "7 days ago",
-    wordCount: 8900,
-    images: 14,
-    serpUsage: 6,
-  },
-  {
-    id: 26,
-    name: "Donna Scott",
-    email: "donna.scott@email.com",
-    plan: "Pro",
-    joinDate: "2024-02-08",
-    lastActive: "3 hours ago",
-    wordCount: 255000,
-    images: 655,
-    serpUsage: 142,
-  },
-  {
-    id: 27,
-    name: "Ronald Green",
-    email: "ronald.green@email.com",
-    plan: "Enterprise",
-    joinDate: "2023-09-15",
-    lastActive: "12 minutes ago",
-    wordCount: 505000,
-    images: 1480,
-    serpUsage: 289,
-  },
-  {
-    id: 28,
-    name: "Cynthia Adams",
-    email: "cynthia.adams@email.com",
-    plan: "Free",
-    joinDate: "2024-08-22",
-    lastActive: "9 days ago",
-    wordCount: 5500,
-    images: 6,
-    serpUsage: 2,
-  },
-];
+// const mockUsers = [
+//   {
+//     id: 1,
+//     name: "John Doe",
+//     email: "john.doe@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-01-15",
+//     lastActive: "2 hours ago",
+//     wordCount: 125000,
+//     images: 450,
+//     serpUsage: 89,
+//   },
+//   {
+//     id: 2,
+//     name: "Jane Smith",
+//     email: "jane.smith@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-11-20",
+//     lastActive: "5 minutes ago",
+//     wordCount: 450000,
+//     images: 1200,
+//     serpUsage: 234,
+//   },
+//   {
+//     id: 3,
+//     name: "Mike Wilson",
+//     email: "mike.wilson@email.com",
+//     plan: "Free",
+//     joinDate: "2024-05-10",
+//     lastActive: "1 day ago",
+//     wordCount: 15000,
+//     images: 25,
+//     serpUsage: 12,
+//   },
+//   {
+//     id: 4,
+//     name: "Sarah Jones",
+//     email: "sarah.jones@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-02-28",
+//     lastActive: "3 hours ago",
+//     wordCount: 275000,
+//     images: 680,
+//     serpUsage: 145,
+//   },
+//   {
+//     id: 5,
+//     name: "David Brown",
+//     email: "david.brown@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-12-05",
+//     lastActive: "1 hour ago",
+//     wordCount: 380000,
+//     images: 950,
+//     serpUsage: 198,
+//   },
+//   {
+//     id: 6,
+//     name: "Emily Davis",
+//     email: "emily.davis@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-03-18",
+//     lastActive: "30 minutes ago",
+//     wordCount: 195000,
+//     images: 520,
+//     serpUsage: 112,
+//   },
+//   {
+//     id: 7,
+//     name: "Chris Martin",
+//     email: "chris.martin@email.com",
+//     plan: "Free",
+//     joinDate: "2024-06-22",
+//     lastActive: "5 days ago",
+//     wordCount: 8500,
+//     images: 15,
+//     serpUsage: 7,
+//   },
+//   {
+//     id: 8,
+//     name: "Amanda White",
+//     email: "amanda.white@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-01-30",
+//     lastActive: "4 hours ago",
+//     wordCount: 215000,
+//     images: 585,
+//     serpUsage: 128,
+//   },
+//   {
+//     id: 9,
+//     name: "Robert Taylor",
+//     email: "robert.taylor@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-10-15",
+//     lastActive: "15 minutes ago",
+//     wordCount: 520000,
+//     images: 1450,
+//     serpUsage: 276,
+//   },
+//   {
+//     id: 10,
+//     name: "Lisa Anderson",
+//     email: "lisa.anderson@email.com",
+//     plan: "Free",
+//     joinDate: "2024-07-08",
+//     lastActive: "3 days ago",
+//     wordCount: 12000,
+//     images: 18,
+//     serpUsage: 9,
+//   },
+//   {
+//     id: 11,
+//     name: "James Thomas",
+//     email: "james.thomas@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-02-14",
+//     lastActive: "1 hour ago",
+//     wordCount: 245000,
+//     images: 620,
+//     serpUsage: 138,
+//   },
+//   {
+//     id: 12,
+//     name: "Jessica Moore",
+//     email: "jessica.moore@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-09-28",
+//     lastActive: "20 minutes ago",
+//     wordCount: 475000,
+//     images: 1380,
+//     serpUsage: 265,
+//   },
+//   {
+//     id: 13,
+//     name: "Daniel Jackson",
+//     email: "daniel.jackson@email.com",
+//     plan: "Free",
+//     joinDate: "2024-08-01",
+//     lastActive: "2 days ago",
+//     wordCount: 9500,
+//     images: 12,
+//     serpUsage: 5,
+//   },
+//   {
+//     id: 14,
+//     name: "Michelle Lee",
+//     email: "michelle.lee@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-04-05",
+//     lastActive: "6 hours ago",
+//     wordCount: 185000,
+//     images: 495,
+//     serpUsage: 105,
+//   },
+//   {
+//     id: 15,
+//     name: "Kevin Harris",
+//     email: "kevin.harris@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-11-10",
+//     lastActive: "10 minutes ago",
+//     wordCount: 425000,
+//     images: 1150,
+//     serpUsage: 228,
+//   },
+//   {
+//     id: 16,
+//     name: "Rachel Clark",
+//     email: "rachel.clark@email.com",
+//     plan: "Free",
+//     joinDate: "2024-06-15",
+//     lastActive: "4 days ago",
+//     wordCount: 11000,
+//     images: 20,
+//     serpUsage: 8,
+//   },
+//   {
+//     id: 17,
+//     name: "Brian Lewis",
+//     email: "brian.lewis@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-03-22",
+//     lastActive: "2 hours ago",
+//     wordCount: 205000,
+//     images: 545,
+//     serpUsage: 118,
+//   },
+//   {
+//     id: 18,
+//     name: "Nicole Walker",
+//     email: "nicole.walker@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-08-19",
+//     lastActive: "25 minutes ago",
+//     wordCount: 495000,
+//     images: 1425,
+//     serpUsage: 282,
+//   },
+//   {
+//     id: 19,
+//     name: "Steven Hall",
+//     email: "steven.hall@email.com",
+//     plan: "Free",
+//     joinDate: "2024-07-20",
+//     lastActive: "6 days ago",
+//     wordCount: 7200,
+//     images: 10,
+//     serpUsage: 4,
+//   },
+//   {
+//     id: 20,
+//     name: "Karen Allen",
+//     email: "karen.allen@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-01-25",
+//     lastActive: "5 hours ago",
+//     wordCount: 235000,
+//     images: 605,
+//     serpUsage: 132,
+//   },
+//   {
+//     id: 21,
+//     name: "Gary Young",
+//     email: "gary.young@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-12-18",
+//     lastActive: "35 minutes ago",
+//     wordCount: 410000,
+//     images: 1090,
+//     serpUsage: 215,
+//   },
+//   {
+//     id: 22,
+//     name: "Patricia King",
+//     email: "patricia.king@email.com",
+//     plan: "Free",
+//     joinDate: "2024-08-10",
+//     lastActive: "8 days ago",
+//     wordCount: 6800,
+//     images: 8,
+//     serpUsage: 3,
+//   },
+//   {
+//     id: 23,
+//     name: "Timothy Wright",
+//     email: "timothy.wright@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-04-12",
+//     lastActive: "1 hour ago",
+//     wordCount: 225000,
+//     images: 595,
+//     serpUsage: 125,
+//   },
+//   {
+//     id: 24,
+//     name: "Sharon Lopez",
+//     email: "sharon.lopez@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-10-30",
+//     lastActive: "45 minutes ago",
+//     wordCount: 465000,
+//     images: 1320,
+//     serpUsage: 252,
+//   },
+//   {
+//     id: 25,
+//     name: "Edward Hill",
+//     email: "edward.hill@email.com",
+//     plan: "Free",
+//     joinDate: "2024-07-28",
+//     lastActive: "7 days ago",
+//     wordCount: 8900,
+//     images: 14,
+//     serpUsage: 6,
+//   },
+//   {
+//     id: 26,
+//     name: "Donna Scott",
+//     email: "donna.scott@email.com",
+//     plan: "Pro",
+//     joinDate: "2024-02-08",
+//     lastActive: "3 hours ago",
+//     wordCount: 255000,
+//     images: 655,
+//     serpUsage: 142,
+//   },
+//   {
+//     id: 27,
+//     name: "Ronald Green",
+//     email: "ronald.green@email.com",
+//     plan: "Enterprise",
+//     joinDate: "2023-09-15",
+//     lastActive: "12 minutes ago",
+//     wordCount: 505000,
+//     images: 1480,
+//     serpUsage: 289,
+//   },
+//   {
+//     id: 28,
+//     name: "Cynthia Adams",
+//     email: "cynthia.adams@email.com",
+//     plan: "Free",
+//     joinDate: "2024-08-22",
+//     lastActive: "9 days ago",
+//     wordCount: 5500,
+//     images: 6,
+//     serpUsage: 2,
+//   },
+// ];
 
 const userActivityData = [
   { day: "Mon", words: 5000, images: 15 },
@@ -367,6 +369,37 @@ export default function Users() {
   const [planFilter, setPlanFilter] = useState("all");
   const [activityFilter, setActivityFilter] = useState("all");
   const [sortBy, setSortBy] = useState("words-desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [mockUsers, setMockUser] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+const mockUserApi = async (page = 1, limit = 10) => {
+  try {
+    setLoading(true);
+    const response = await apiFunctions.getMockUser(page, limit);
+    if (response.data.status === 200) {
+      setMockUser(response.data.data.users);
+      setTotalPages(response.data.data.pagination.totalPages);
+      setTotalRecords(response.data.data.pagination.totalRecords);
+    }
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  mockUserApi(currentPage, itemsPerPage);
+}, [currentPage]);
+
+// Initial load
+useEffect(() => {
+  mockUserApi(1, itemsPerPage);
+}, []);
 
   const toggleUserSelection = (userId) => {
     setSelectedUsers((prev) =>
@@ -383,6 +416,7 @@ export default function Users() {
     );
   };
 
+  // Client-side filtering (since API doesn't support filtering yet)
   const filteredAndSortedUsers = mockUsers
     .filter((user) => {
       const matchesSearch =
@@ -414,6 +448,11 @@ export default function Users() {
           return 0;
       }
     });
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, planFilter, activityFilter, sortBy]);
 
   // Add User dialog state and helpers
   const [open, setOpen] = useState(false);
@@ -607,7 +646,12 @@ export default function Users() {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
+          {loading ? (
+            <div className="flex justify-center items-center p-8">
+              <div className="text-muted-foreground">Loading users...</div>
+            </div>
+          ) : (
+            <Table>
             <TableHeader>
               <TableRow>
                 {/* <TableHead className="w-12">
@@ -648,7 +692,7 @@ export default function Users() {
                       onCheckedChange={() => toggleUserSelection(user.id)}
                     />
                   </TableCell> */}
-                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell className="font-medium">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
@@ -796,8 +840,18 @@ export default function Users() {
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 }
