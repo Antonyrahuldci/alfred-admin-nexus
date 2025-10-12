@@ -464,7 +464,7 @@ export default function Users() {
       {/* Add User Modal */}
       <div className="m-3 ">
         <Dialog open={open} onOpenChange={setOpen} className="Model_Content m-3">
-          <DialogContent className=" Model_popups " >
+          <DialogContent className=" Model_popups_adduser" >
             <DialogHeader>
               <DialogTitle className="Add_user">Add User</DialogTitle>
             </DialogHeader>
