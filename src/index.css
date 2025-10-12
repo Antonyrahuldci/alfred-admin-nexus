@@ -126,7 +126,7 @@ header {
   /* margin-bottom: 20px; */
 }
 .input-wrapper:focus-within {
-  border-color: #84E084;        /* green border on focus */
+  border-color: #50c36b;        /* green border on focus */
   background-color: #F5FFF8;    /* light green background on focus */
 }
 .input-wrapper input {
@@ -173,16 +173,16 @@ header {
 }
 .Add_Btn{
   font-weight: 600;
-  background-color: #84E084;
+  background-color: #50c36b !important;
   height: 35px;
   width: 130px;
-  color: #021E22;
+ color: #fff !important;
   font-size: 14px;
   border-radius: 6px;
 }
 .Model_popups{
   height: fit-content;
-  max-width: 400px;
+  max-width: 570px;
   width: 100%;
 }
 .Eye_Color{
@@ -195,10 +195,20 @@ header {
 .Model_popups{
   border-radius: 15px;
 }
+.clear_bg_btn{
+  background-color: #EAEAEA !important;
+  color: #000 !important;
+  border-color: #EAEAEA !important
+}
+.send_coupon_bg{
+  background-color: #50c36b !important;
+  color: #000 !important;
+}
 @media(max-width:450px){
   .Model_popups{
   max-width: 360px;
   width: 100%;
+  height: 90%;
   border-radius: 15px;
 }
 .custom-scrollbar{
@@ -206,5 +216,10 @@ header {
   margin-top: 2px;
   scrollbar-width: none;
 
+}
+.dialog-coupon{
+  max-width: 380px !important;
+  height: 90% !important;
+  border-radius: 15px;
 }
 }

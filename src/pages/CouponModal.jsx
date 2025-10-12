@@ -208,8 +208,8 @@ const CouponModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg w-full">
+    <Dialog  open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg w-full dialog-coupon">
         <DialogHeader className="text-center">
           <DialogTitle className="text-xl font-semibold text-center">
             Send Coupon Code
@@ -496,14 +496,14 @@ const CouponModal = ({ isOpen, onClose }) => {
               type="button"
               variant="outline"
               onClick={handleClearAll}
-              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white border-gray-600"
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white border-gray-600 clear_bg_btn"
             >
               Clear All
             </Button>
             <Button
               type="button"
               onClick={handleSendCoupon}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white send_coupon-bg"
             >
               SEND COUPON ({emails.length})
             </Button>

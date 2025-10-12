@@ -194,7 +194,7 @@ export default function CreditUsage() {
         <CardContent>
           <div className="space-y-3">
             {creditsByUser.map((user, idx) => (
-              <div key={idx} className="flex items-center gap-4 p-4 rounded-lg border border-border">
+              <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border border-border">
                 <div className="flex-1">
                   <p className="font-medium">{user.email}</p>
                   <p className="text-sm text-muted-foreground">{user.plan} Plan</p>
@@ -203,13 +203,15 @@ export default function CreditUsage() {
                   <p className="font-bold text-primary">{user.used.toLocaleString()} used</p>
                   <p className="text-sm text-muted-foreground">{user.remaining.toLocaleString()} remaining</p>
                 </div>
-                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                <div className="w-full sm:w-24 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary transition-all"
                     style={{ width: `${user.used / (user.used + user.remaining) * 100}%` }}
                   />
                 </div>
               </div>
+                
+              
             ))}
           </div>
         </CardContent>
