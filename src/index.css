@@ -184,12 +184,14 @@ header {
   height: fit-content;
   max-width: 570px;
   width: 100%;
+  overflow-y: hidden;
 }
 .Model_popups_adduser{
   height: fit-content;
   max-width: 570px;
   width: 100%;
   border-radius: 15px;
+ 
 }
 .Eye_Color{
   color: grey;
@@ -227,7 +229,6 @@ header {
   padding-right: 5px;
   margin-top: 2px;
   scrollbar-width: none;
-
 }
 .dialog-coupon{
   max-width: 380px !important;
