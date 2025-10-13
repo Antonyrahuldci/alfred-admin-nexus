@@ -3,6 +3,8 @@ import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tool
 import { Coins, TrendingUp, AlertTriangle, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import apiFunctions from "@/api/apiFunctions";
 
 const creditsByUser = [
 { email: "john.doe@email.com", used: 8500, remaining: 1500, plan: "Pro" },
@@ -16,8 +18,8 @@ const aiModelUsage = [
 { model: "GPT-4", requests: 12450, tokens: 2340000 },
 { model: "GPT-3.5", requests: 34200, tokens: 4560000 },
 { model: "DALL-E 3", requests: 5600, tokens: 0 },
-// { model: "DALL-E 2", requests: 8900, tokens: 0 },
-// { model: "Claude 3", requests: 6700, tokens: 1890000 }
+{ model: "DALL-E 2", requests: 8900, tokens: 0 },
+{ model: "Claude 3", requests: 6700, tokens: 1890000 }
 ];
 
 
@@ -67,6 +69,79 @@ const avgCreditsData = [
 
 
 export default function CreditUsage() {
+  const [heatmapData, setHeatmapData] = useState(featureUsageHeatmap);
+  const [creditsByUserData, setCreditsByUserData] = useState(creditsByUser);
+  const [avgCredits, setAvgCredits] = useState(avgCreditsData);
+  const [aiModelUsageData, setAiModelUsageData] = useState(aiModelUsage);
+  const [modelDistributionData, setModelDistributionData] = useState(modelDistribution);
+  const [totals, setTotals] = useState({ total_credits_consumed: null, average_credits_per_user: null, total_users: null, timestamp: null });
+  const fetchHeatmap = async () => {
+    const res = await apiFunctions.getFeatureUsageHeatmap(7);
+    if (res?.success && Array.isArray(res?.data)) {
+      setHeatmapData(res.data);
+    }
+  };
+  const fetchCreditsByUser = async () => {
+    const res = await apiFunctions.getCreditsByUser(5);
+    if (res?.success && Array.isArray(res?.data)) {
+      setCreditsByUserData(res.data);
+    }
+  };
+  const fetchAverageCredits = async () => {
+    const res = await apiFunctions.getAverageCreditsPerActiveUser();
+    if (res?.success && Array.isArray(res?.data)) {
+      setAvgCredits(res.data);
+    }
+  };
+  const fetchAiModelUsage = async () => {
+    const res = await apiFunctions.getAiModelUsageBreakdown();
+    if (res?.success && Array.isArray(res?.data)) {
+      const normalized = res.data.map((item) => ({
+        ...item,
+        tokens: typeof item.tokens === 'string' ? Number(item.tokens) : item.tokens
+      }));
+      setAiModelUsageData(normalized);
+    }
+  };
+  const fetchModelDistribution = async () => {
+    const res = await apiFunctions.getFeatureUsageDistribution();
+    if (res?.success && Array.isArray(res?.data)) {
+      const COLORS = [
+        "hsl(217 91% 60%)",
+        "hsl(142 76% 36%)",
+        "hsl(38 92% 50%)",
+        "hsl(280 65% 60%)",
+        "hsl(200 70% 50%)"
+      ];
+      const normalized = res.data.map((item, index) => ({
+        name: item.name,
+        value: typeof item.value === 'string' ? Number(item.value) : item.value,
+        color: COLORS[index % COLORS.length]
+      }));
+      setModelDistributionData(normalized);
+    }
+  };
+  const fetchTotals = async () => {
+    const res = await apiFunctions.getTotalCreditsConsumed();
+    if (res?.success && res?.data) {
+      // Normalize potential string numbers
+      const data = res.data;
+      setTotals({
+        total_credits_consumed: typeof data.total_credits_consumed === 'string' ? Number(data.total_credits_consumed) : data.total_credits_consumed,
+        average_credits_per_user: typeof data.average_credits_per_user === 'string' ? Number(data.average_credits_per_user) : data.average_credits_per_user,
+        total_users: typeof data.total_users === 'string' ? Number(data.total_users) : data.total_users,
+        timestamp: data.timestamp || null
+      });
+    }
+  };
+  useEffect(() => {
+    fetchHeatmap();
+    fetchCreditsByUser();
+    fetchAverageCredits();
+    fetchAiModelUsage();
+    fetchModelDistribution();
+    fetchTotals();
+  }, []);
   return (
     <div className="space-y-6">
       <div>
@@ -80,7 +155,11 @@ export default function CreditUsage() {
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Total Credits Used</p>
-                <p className="text-3xl font-bold">245.8K</p>
+                <p className="text-3xl font-bold">
+                  {totals.total_credits_consumed !== null
+                    ? totals.total_credits_consumed.toLocaleString(undefined, { maximumFractionDigits: 2 })
+                    : '—'}
+                </p>
               </div>
               <Coins className="h-8 w-8 text-primary" />
             </div>
@@ -91,7 +170,11 @@ export default function CreditUsage() {
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Avg Credits/User</p>
-                <p className="text-3xl font-bold">4,650</p>
+                <p className="text-3xl font-bold">
+                  {totals.average_credits_per_user !== null
+                    ? totals.average_credits_per_user.toLocaleString(undefined, { maximumFractionDigits: 2 })
+                    : '—'}
+                </p>
               </div>
               <TrendingUp className="h-8 w-8 text-primary" />
             </div>
@@ -128,7 +211,7 @@ export default function CreditUsage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {aiModelUsage.map((model, idx) => (
+              {aiModelUsageData.map((model, idx) => (
                 <div key={idx} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{model.model}</span>
@@ -161,7 +244,7 @@ export default function CreditUsage() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={modelDistribution}
+                  data={modelDistributionData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -170,7 +253,7 @@ export default function CreditUsage() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {modelDistribution.map((entry, index) => (
+                  {modelDistributionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -193,7 +276,7 @@ export default function CreditUsage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {creditsByUser.map((user, idx) => (
+            {creditsByUserData.map((user, idx) => (
               <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border border-border">
                 <div className="flex-1">
                   <p className="font-medium">{user.email}</p>
@@ -224,7 +307,7 @@ export default function CreditUsage() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={avgCreditsData}>
+              <LineChart data={avgCredits}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
@@ -307,7 +390,7 @@ export default function CreditUsage() {
                 </tr>
               </thead>
               <tbody>
-                {featureUsageHeatmap.map((row, idx) => (
+                {heatmapData.map((row, idx) => (
                   <tr key={idx} className="border-b">
                     <td className="p-3 font-medium">{row.feature}</td>
                     {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((day) => {
