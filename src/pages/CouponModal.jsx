@@ -15,6 +15,7 @@ import {
   Snackbar,
   Alert as MuiAlert,
 } from "@mui/material";
+import apiFunctions from "@/api/apiFunctions";
 
 // Alert wrapper
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -171,16 +172,48 @@ const CouponModal = ({ isOpen, onClose }) => {
     setEmailInput("");
   };
 
-  const handleSendCoupon = () => {
+  const handleSendCoupon = async () => {
     if (emails.length === 0) {
       showSnackbar("Please select at least one recipient.", "warning");
       return;
     }
 
-    // Handle sending coupon logic here
-    console.log("Sending coupon:", { ...formData, recipients: emails });
-    showSnackbar(`Coupon sent to ${emails.length} recipient(s)!`, "success");
-    onClose();
+    // Basic validations
+    const discountValueNum = Number(formData.discountValue);
+    if (!discountValueNum || discountValueNum <= 0) {
+      showSnackbar("Enter a valid discount value.", "warning");
+      return;
+    }
+
+    if (
+      formData.discountType === "percentage" &&
+      (discountValueNum < 1 || discountValueNum > 100)
+    ) {
+      showSnackbar("Percentage discount must be between 1 and 100.", "warning");
+      return;
+    }
+
+    try {
+      const payload = {
+        emails,
+        customMessage: formData.description,
+        discountType: formData.discountType,
+        discountValue: discountValueNum,
+        couponCode: formData.couponCode || undefined,
+        description: formData.description,
+        currency: formData.currency,
+      };
+
+      const res = await apiFunctions.sendCoupon(payload);
+      if (res?.success && res?.status === 200) {
+        showSnackbar("Coupon sent successfully!", "success");
+        onClose();
+      } else {
+        showSnackbar(res?.message || "Failed to send coupon.", "error");
+      }
+    } catch (err) {
+      showSnackbar("Failed to send coupon.", "error");
+    }
   };
 
   const getCurrencySymbol = () => {
