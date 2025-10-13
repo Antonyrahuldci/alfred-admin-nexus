@@ -114,12 +114,14 @@ export default function Overview() {
   const getRecentActivityAPI = async () => {
     try {
       const response = await apiFunctions.getRecentActivity();
-      console.log(response.data);
+      console.log("Recent Activity API Response:", response.data);
       if (response.data.status === 200) {
-        setRecentActivity(response.data.data);
+        // Extract activities from the new API response structure
+        const activities = response.data.data.activities || response.data.data;
+        setRecentActivity(activities);
       }
     } catch (err) {
-      console.log(err);
+      console.log("Recent Activity API Error:", err);
     }
   };
 
@@ -388,37 +390,60 @@ export default function Overview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-3 rounded-lg border border-border p-3"
-                >
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium">{activity.user}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {activity.action}
-                    </p>
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium">{activity.user}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {activity.action}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge
+                        variant={
+                          activity.type === "signup"
+                            ? "default"
+                            : activity.type === "plan_change"
+                            ? "default"
+                            : activity.type === "cancellation"
+                            ? "destructive"
+                            : activity.type === "autopay_change"
+                            ? "secondary"
+                            : "outline"
+                        }
+                        className={
+                          activity.type === "signup"
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
+                            : activity.type === "plan_change"
+                            ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                            : activity.type === "cancellation"
+                            ? "bg-red-100 text-red-800 hover:bg-red-200"
+                            : activity.type === "autopay_change"
+                            ? "bg-orange-100 text-orange-800 hover:bg-orange-200"
+                            : ""
+                        }
+                      >
+                        {activity.type === "plan_change"
+                          ? "Plan Change"
+                          : activity.type === "autopay_change"
+                          ? "Autopay"
+                          : activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {activity.time}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <Badge
-                      variant={
-                        activity.type === "signup"
-                          ? "default"
-                          : activity.type === "upgrade"
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
-                      {/* {activity.type} */}
-                      {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
-
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {activity.time}
-                    </span>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No recent activity found</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
