@@ -1,4 +1,5 @@
-import { Users, UserCheck, DollarSign, TrendingUp, Percent, TrendingDown, Wallet } from "lucide-react";
+import { Users, UserCheck, TrendingUp, Percent, TrendingDown, Wallet } from "lucide-react";
+import { MdCurrencyRupee } from 'react-icons/md';
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -113,8 +114,8 @@ export default function Overview() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Users" value="5,234" icon={Users} trend={{ value: 12.5, isPositive: true }} />
         <StatCard title="Active Users (Today)" value="892" icon={UserCheck} trend={{ value: 8.2, isPositive: true }} />
-        <StatCard title="Total Revenue" value="$624,000" icon={DollarSign} trend={{ value: 23.1, isPositive: true }} />
-        <StatCard title="OpenAI Balance" value="$12,450" icon={Wallet} trend={{ value: -15.3, isPositive: false }} />
+        <StatCard title="Total Revenue" value="₹624,000" icon={MdCurrencyRupee} trend={{ value: 23.1, isPositive: true }} />
+        <StatCard title="OpenAI Balance" value="₹12,450" icon={Wallet} trend={{ value: -15.3, isPositive: false }} />
       </div>
 
       {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -184,7 +185,7 @@ export default function Overview() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-primary" />
+              <MdCurrencyRupee className="h-5 w-5 text-primary" />
               Revenue Trend
             </CardTitle>
           </CardHeader>
@@ -243,7 +244,7 @@ export default function Overview() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 Recent_Activity">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>

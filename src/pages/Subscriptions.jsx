@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MdCurrencyRupee } from "react-icons/md";
+
 import {
   Table,
   TableBody,
@@ -77,10 +79,10 @@ export default function Subscriptions() {
     console.log(response.data.data);
     if (response.data.status === 200) {
       // Convert paisa to rupees (divide by 100)
-      const convertedPlans = response.data.data.map(plan => ({
+      const convertedPlans = response.data.data.map((plan) => ({
         ...plan,
         revenue: Math.round(plan.revenue / 100), // Convert paisa to rupees
-        price: `₹${Math.round(parseInt(plan.price.replace('$', '')) / 100)}` // Convert price from paisa to rupees and change symbol
+        price: `₹${Math.round(parseInt(plan.price.replace("$", "")) / 100)}`, // Convert price from paisa to rupees and change symbol
       }));
       setPlans(convertedPlans);
     }
@@ -90,10 +92,12 @@ export default function Subscriptions() {
   }, []);
 
   // Filter plans with revenue > 0 for the pie chart
-  const revenueByPlan = plans.filter(plan => plan.revenue > 0).map(plan => ({
-    name: plan.name,
-    value: plan.revenue
-  }));
+  const revenueByPlan = plans
+    .filter((plan) => plan.revenue > 0)
+    .map((plan) => ({
+      name: plan.name,
+      value: plan.revenue,
+    }));
 
   return (
     <div className="space-y-6">
@@ -130,9 +134,9 @@ export default function Subscriptions() {
               </div>
               {plan.revenue > 0 && (
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <MdCurrencyRupee className="h-4 w-4 text-muted-foreground" />
                   <span className="text-2xl font-bold">
-                    ${plan.revenue.toLocaleString()}
+                    {plan.revenue.toLocaleString()}
                   </span>
                   <span className="text-sm text-muted-foreground">MRR</span>
                 </div>
@@ -159,7 +163,7 @@ export default function Subscriptions() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, value }) =>
-                    `${name}: $${value.toLocaleString()}`
+                    `${name}: ₹${value.toLocaleString()}`
                   }
                   outerRadius={100}
                   fill="#8884d8"
