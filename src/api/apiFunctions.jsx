@@ -36,14 +36,33 @@ const apiFunctions = {
   getUsageSummary: (userId) => method.get(`https://backend-alfred.simbli.ai/usage/summary/${userId}`),
   sendCoupon: (payload) => method.post("/send_coupon", payload),
 
+  // analytics
+  getFeatureUsageHeatmap: (days = 7) =>
+    method.get(`https://backend-alfred.simbli.ai/admin/feature-usage-heatmap?days=${days}`),
+  getCreditsByUser: (limit = 5) =>
+    method.get(`https://backend-alfred.simbli.ai/admin/credits-by-user?limit=${limit}`),
+  getAverageCreditsPerActiveUser: () =>
+    method.get(`https://backend-alfred.simbli.ai/admin/average-credits-per-active-user`),
+  getAiModelUsageBreakdown: () =>
+    method.get(`https://backend-alfred.simbli.ai/admin/ai-model-usage-breakdown`),
+  getFeatureUsageDistribution: () =>
+    method.get(`https://backend-alfred.simbli.ai/admin/feature-usage-distribution`),
+  getTotalCreditsConsumed: () =>
+    method.get(`https://backend-alfred.simbli.ai/admin/total-credits-consumed`),
+  getTopActiveUsers: (limit=5) =>
+    method.get(`https://backend-alfred.simbli.ai/admin/top-active-users?limit=${limit}`),
+
   //newAdmin
 
+  getDashboard: () => method.get(`${appConstants?.newAdminBaseUrl}/dashboard`),
   getUsersGrowth: (timeRange) => method.get(`${appConstants?.newAdminBaseUrl}/new-users-growth?timeRange=${timeRange}`),
   getUsersGrowthMonthly: () => method.get(`${appConstants?.newAdminBaseUrl}/monthly-user-growth`),
   getMonthlyRevenue: () => method.get(`${appConstants?.newAdminBaseUrl}/monthly-revenue`),
   getRecentActivity: (limit) => method.get(`${appConstants?.newAdminBaseUrl}/recent-activity?limit=${limit || 10}`),
   getMockUser: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/users-with-usage?page=${page || 1}&limit=${limit || 10}`),
-  getUserPlansData: () => method.get(`${appConstants?.newAdminBaseUrl}/subscription-plans-with-revenue`)
+  getUserPlansData: () => method.get(`${appConstants?.newAdminBaseUrl}/subscription-plans-with-revenue`),
+  getPaymentHistory: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/payment-history?page=${page || 1}&limit=${limit || 10}`),
+  getCoupons: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/coupons?page=${page || 1}&limit=${limit || 10}`)
 };
 
 export default apiFunctions;

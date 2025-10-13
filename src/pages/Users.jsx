@@ -675,6 +675,7 @@ useEffect(() => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Plan</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Join Date</TableHead>
                 <TableHead>Last Active</TableHead>
                 <TableHead className="text-right">Words</TableHead>
@@ -706,6 +707,19 @@ useEffect(() => {
                       }
                     >
                       {user.plan}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        user.plan === "Enterprise"
+                          ? "default"
+                          : user.plan === "Pro"
+                            ? "default"
+                            : "secondary"
+                      }
+                    >
+                      {user.status}
                     </Badge>
                   </TableCell>
                   <TableCell>{user.joinDate}</TableCell>

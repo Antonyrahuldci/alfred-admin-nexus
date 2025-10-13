@@ -81,17 +81,18 @@ const funnelData = [
   { stage: "Subscription", users: 1847, percent: 35 },
 ];
 
-const topActiveUsers = [
-  { name: "john.doe@email.com", credits: 45234, plan: "Enterprise" },
-  { name: "sarah.wilson@email.com", credits: 38912, plan: "Pro" },
-  { name: "mike.johnson@email.com", credits: 32456, plan: "Enterprise" },
-  { name: "emma.brown@email.com", credits: 28734, plan: "Pro" },
-  { name: "alex.davis@email.com", credits: 24123, plan: "Pro" },
-];
+// const topActiveUsers = [
+//   { name: "john.doe@email.com", credits: 45234, plan: "Enterprise" },
+//   { name: "sarah.wilson@email.com", credits: 38912, plan: "Pro" },
+//   { name: "mike.johnson@email.com", credits: 32456, plan: "Enterprise" },
+//   { name: "emma.brown@email.com", credits: 28734, plan: "Pro" },
+//   { name: "alex.davis@email.com", credits: 24123, plan: "Pro" },
+// ];
 
 export default function UserAnalytics() {
   const [growthData, setGrowthData] = useState([]);
   const [timeRange, setTimeRange] = useState("30days");
+  const [topActiveUsers, setTopActiveUsers] = useState([]);
   
   const userGrowthAPI = async (selectedTimeRange = timeRange) => {
     try {
@@ -117,6 +118,32 @@ export default function UserAnalytics() {
     userGrowthAPI();
   }, [timeRange]);
   console.log("growthData", growthData);
+  const fetchTopActiveUsers = async (limit=5) => {
+    try {
+      const response = await apiFunctions.getTopActiveUsers(limit);
+      // Response is an array per provided endpoint
+      const users = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response?.data?.data)
+        ? response.data.data
+        : [];
+
+      const mapped = users.map((u) => ({
+        name: u.email,
+        plan: u.plan_type,
+        credits: Number(u.total_tokens || 0),
+      }));
+      setTopActiveUsers(mapped);
+    } catch (err) {
+      console.log(err);
+      setTopActiveUsers([]);
+    }
+  };
+  useEffect(() => {
+
+
+    fetchTopActiveUsers();
+  }, []);
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -337,7 +364,7 @@ export default function UserAnalytics() {
                     <p className="text-sm text-muted-foreground">{user.plan}</p>
                   </div>
                   <span className="font-bold text-primary">
-                    {user.credits.toLocaleString()}
+                    {Number(user.credits || 0).toLocaleString()}
                   </span>
                 </div>
               ))}

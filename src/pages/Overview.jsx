@@ -38,11 +38,7 @@ import apiFunctions from "../api/apiFunctions";
 //   { month: "Jun", revenue: 52000 }
 // ];
 
-const featureUsageData = [
-  { name: "Writing", value: 45 },
-  { name: "Image Gen", value: 30 },
-  { name: "SERP", value: 25 }
-];
+// Feature usage distribution will be fetched from backend
 
 const COLORS = ["hsl(217 91% 60%)", "hsl(142 76% 36%)", "hsl(38 92% 50%)"];
 
@@ -58,6 +54,12 @@ export default function Overview() {
   const [userDataMonth , setUserDataMonth]= useState([])
   const [revenueData , setRevenueData]= useState([])
   const [recentActivity , setRecentActivity] = useState([])
+  const [featureUsageData, setFeatureUsageData] = useState([])
+  const [dashboardStats, setDashboardStats] = useState({
+    totalUsers: { value: 0, change: 0, changeType: "no_change" },
+    activeUsersToday: { value: 0, change: 0, changeType: "no_change" },
+    totalRevenue: { value: 0, change: 0, changeType: "no_change" }
+  })
  const getUserGrowthMonth = async()=>{
   try{
 
@@ -66,6 +68,22 @@ export default function Overview() {
     if(response.data.status ===200){
 
       setUserDataMonth(response.data.data)
+    }
+  }catch(err){
+    console.log(err)
+  }
+ }
+ const getFeatureUsageDistributionAPI = async()=>{
+  try{
+    const response = await apiFunctions.getFeatureUsageDistribution()
+    // Handle both raw array and wrapped { data } formats
+    const raw = Array.isArray(response.data) ? response.data : response.data?.data
+    if(Array.isArray(raw)){
+      const normalized = raw.map((item)=>({
+        name: item.name,
+        value: typeof item.value === 'string' ? parseFloat(item.value) : Number(item.value)
+      }))
+      setFeatureUsageData(normalized)
     }
   }catch(err){
     console.log(err)
@@ -98,10 +116,28 @@ export default function Overview() {
   }
  }
 
- useEffect(()=>{
+ const getDashboardAPI = async()=>{
+  try{
+    const response = await apiFunctions.getDashboard()
+    const data = response?.data?.data
+    if(response?.data?.status === 200 && data){
+      setDashboardStats({
+        totalUsers: data.totalUsers || { value: 0, change: 0, changeType: "no_change" },
+        activeUsersToday: data.activeUsersToday || { value: 0, change: 0, changeType: "no_change" },
+        totalRevenue: data.totalRevenue || { value: 0, change: 0, changeType: "no_change" }
+      })
+    }
+  }catch(err){
+    console.log(err)
+  }
+ }
+
+useEffect(()=>{
   getUserGrowthMonth()
   getRevue()
   getRecentActivityAPI()
+  getFeatureUsageDistributionAPI()
+  getDashboardAPI()
  },[])
 
   return (
@@ -112,10 +148,25 @@ export default function Overview() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Users" value="5,234" icon={Users} trend={{ value: 12.5, isPositive: true }} />
-        <StatCard title="Active Users (Today)" value="892" icon={UserCheck} trend={{ value: 8.2, isPositive: true }} />
-        <StatCard title="Total Revenue" value="₹624,000" icon={MdCurrencyRupee} trend={{ value: 23.1, isPositive: true }} />
-        <StatCard title="OpenAI Balance" value="₹12,450" icon={Wallet} trend={{ value: -15.3, isPositive: false }} />
+        <StatCard
+          title="Total Users"
+          value={dashboardStats.totalUsers.value?.toLocaleString?.() || dashboardStats.totalUsers.value}
+          icon={Users}
+          trend={{ value: Math.abs(dashboardStats.totalUsers.change || 0), isPositive: (dashboardStats.totalUsers.change || 0) >= 0 }}
+        />
+        <StatCard
+          title="Active Users (Today)"
+          value={dashboardStats.activeUsersToday.value?.toLocaleString?.() || dashboardStats.activeUsersToday.value}
+          icon={UserCheck}
+          trend={{ value: Math.abs(dashboardStats.activeUsersToday.change || 0), isPositive: (dashboardStats.activeUsersToday.change || 0) >= 0 }}
+        />
+        <StatCard
+          title="Total Revenue"
+          value={`₹${((dashboardStats.totalRevenue.value || 0) / 100).toLocaleString()}`}
+          icon={DollarSign}
+          trend={{ value: Math.abs(dashboardStats.totalRevenue.change || 0), isPositive: (dashboardStats.totalRevenue.change || 0) >= 0 }}
+        />
+        <StatCard title="OpenAI Balance" value="$12,450" icon={Wallet} trend={{ value: -15.3, isPositive: false }} />
       </div>
 
       {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

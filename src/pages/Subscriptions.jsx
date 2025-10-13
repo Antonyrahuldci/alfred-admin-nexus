@@ -16,6 +16,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CouponModal from "./CouponModal";
 import { useEffect, useState } from "react";
 import apiFunctions from "@/api/apiFunctions";
+import Pagination from "@/components/Pagination/Pagination.jsx";
 
 // const plans = [
 //   { name: "Free", price: "$0", subscribers: 2134, revenue: 0 },
@@ -27,53 +28,59 @@ import apiFunctions from "@/api/apiFunctions";
 
 const COLORS = ["hsl(217 91% 60%)", "hsl(142 76% 36%)"];
 
-const paymentHistory = [
-  {
-    id: 1,
-    user: "john.doe@email.com",
-    plan: "Pro",
-    amount: "$29",
-    date: "2024-10-01",
-    status: "Completed",
-  },
-  {
-    id: 2,
-    user: "jane.smith@email.com",
-    plan: "Enterprise",
-    amount: "$99",
-    date: "2024-10-01",
-    status: "Completed",
-  },
-  {
-    id: 3,
-    user: "mike.wilson@email.com",
-    plan: "Pro",
-    amount: "$29",
-    date: "2024-10-02",
-    status: "Completed",
-  },
-  {
-    id: 4,
-    user: "sarah.jones@email.com",
-    plan: "Enterprise",
-    amount: "$99",
-    date: "2024-10-02",
-    status: "Failed",
-  },
-  {
-    id: 5,
-    user: "alex.brown@email.com",
-    plan: "Pro",
-    amount: "$29",
-    date: "2024-10-03",
-    status: "Completed",
-  },
-];
+// const paymentHistory = [
+//   {
+//     id: 1,
+//     user: "john.doe@email.com",
+//     plan: "Pro",
+//     amount: "$29",
+//     date: "2024-10-01",
+//     status: "Completed",
+//   },
+//   {
+//     id: 2,
+//     user: "jane.smith@email.com",
+//     plan: "Enterprise",
+//     amount: "$99",
+//     date: "2024-10-01",
+//     status: "Completed",
+//   },
+//   {
+//     id: 3,
+//     user: "mike.wilson@email.com",
+//     plan: "Pro",
+//     amount: "$29",
+//     date: "2024-10-02",
+//     status: "Completed",
+//   },
+//   {
+//     id: 4,
+//     user: "sarah.jones@email.com",
+//     plan: "Enterprise",
+//     amount: "$99",
+//     date: "2024-10-02",
+//     status: "Failed",
+//   },
+//   {
+//     id: 5,
+//     user: "alex.brown@email.com",
+//     plan: "Pro",
+//     amount: "$29",
+//     date: "2024-10-03",
+//     status: "Completed",
+//   },
+// ];
 
 export default function Subscriptions() {
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
-
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [plans, setPlans] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([])
+  const [coupons, setCoupons] = useState([])
+  const [couponPagination, setCouponPagination] = useState({ totalPages: 0, totalRecords: 0 })
   const getUserPlansDataApi = async () => {
     const response = await apiFunctions.getUserPlansData();
     console.log(response.data.data);
@@ -87,9 +94,45 @@ export default function Subscriptions() {
       setPlans(convertedPlans);
     }
   };
+
+  const getPaymentHistoryDataApi = async (page = 1, limit = 10) => {
+    try {
+      const response = await apiFunctions.getPaymentHistory(page, limit)
+      if (response.data.status === 200) {
+
+        setPaymentHistory(response.data.data.paymentHistory)
+        setTotalPages(response.data.data.pagination.totalPages);
+        setTotalRecords(response.data.data.pagination.totalRecords);
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const getCouponsApi = async (page = 1, limit = 10) => {
+    try {
+      const response = await apiFunctions.getCoupons(page, limit)
+      if (response.data.status === 200) {
+        setCoupons(response.data.data.coupons || [])
+        setCouponPagination({
+          totalPages: response.data.data.pagination.totalPages,
+          totalRecords: response.data.data.pagination.totalRecords,
+        })
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   useEffect(() => {
     getUserPlansDataApi();
+    getPaymentHistoryDataApi(currentPage, itemsPerPage);
+    getCouponsApi(1, 10);
   }, []);
+
+  useEffect(() => {
+    getPaymentHistoryDataApi(currentPage, itemsPerPage);
+  }, [currentPage]);
 
   // Filter plans with revenue > 0 for the pie chart
   const revenueByPlan = plans
@@ -194,69 +237,21 @@ export default function Subscriptions() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <p className="font-medium">SUMMER20</p>
-                  <p className="text-sm text-muted-foreground">
-                    20% off for 3 months
-                  </p>
-                </div>
-                <Badge>Active</Badge>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <p className="font-medium">EARLYBIRD</p>
-                  <p className="text-sm text-muted-foreground">
-                    50% off first month
-                  </p>
-                </div>
-                <Badge variant="secondary">Expired</Badge>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <p className="font-medium">WELCOME10</p>
-                  <p className="text-sm text-muted-foreground">
-                    $10 off first purchase
-                  </p>
-                </div>
-                <Badge>Active</Badge>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <p className="font-medium">BLACKFRIDAY</p>
-                  <p className="text-sm text-muted-foreground">
-                    30% off for Black Friday
-                  </p>
-                </div>
-                <Badge variant="secondary">Expired</Badge>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <p className="font-medium">STUDENT15</p>
-                  <p className="text-sm text-muted-foreground">
-                    15% off for students
-                  </p>
-                </div>
-                <Badge>Active</Badge>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <p className="font-medium">LOYALTY25</p>
-                  <p className="text-sm text-muted-foreground">
-                    25% off for loyal customers
-                  </p>
-                </div>
-                <Badge>Active</Badge>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <p className="font-medium">NEWYEAR50</p>
-                  <p className="text-sm text-muted-foreground">
-                    50% off New Year special
-                  </p>
-                </div>
-                <Badge variant="secondary">Expired</Badge>
-              </div>
+              {coupons.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No coupons found.</div>
+              ) : (
+                coupons.map((c) => (
+                  <div key={c.id || c.code} className="flex items-center justify-between rounded-lg border border-border p-3">
+                    <div>
+                      <p className="font-medium">{c.code}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {c.discount_type === 'percentage' ? `${c.discount_amount}% off` : `$${c.discount_amount} off`}
+                      </p>
+                    </div>
+                    <Badge variant={c.is_active ? 'default' : 'secondary'}>{c.is_active ? 'Active' : 'Inactive'}</Badge>
+                  </div>
+                ))
+              )}
             </div>
             <Button
               variant="outline"
@@ -310,6 +305,13 @@ export default function Subscriptions() {
           </Table>
         </CardContent>
       </Card>
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
       <CouponModal
         isOpen={isCouponModalOpen}
         onClose={() => setIsCouponModalOpen(false)}
