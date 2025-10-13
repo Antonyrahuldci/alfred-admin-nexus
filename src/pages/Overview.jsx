@@ -1,5 +1,13 @@
-import { Users, UserCheck, TrendingUp, Percent, TrendingDown, Wallet } from "lucide-react";
-import { MdCurrencyRupee } from 'react-icons/md';
+import {
+  Users,
+  UserCheck,
+  TrendingUp,
+  Percent,
+  TrendingDown,
+  Wallet,
+  DollarSign
+} from "lucide-react";
+import { MdCurrencyRupee } from "react-icons/md";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +23,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { useEffect, useState } from "react";
 import apiFunctions from "../api/apiFunctions";
@@ -51,122 +59,157 @@ const COLORS = ["hsl(217 91% 60%)", "hsl(142 76% 36%)", "hsl(38 92% 50%)"];
 // ];
 
 export default function Overview() {
-  const [userDataMonth , setUserDataMonth]= useState([])
-  const [revenueData , setRevenueData]= useState([])
-  const [recentActivity , setRecentActivity] = useState([])
-  const [featureUsageData, setFeatureUsageData] = useState([])
+  const [userDataMonth, setUserDataMonth] = useState([]);
+  const [revenueData, setRevenueData] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [featureUsageData, setFeatureUsageData] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({
     totalUsers: { value: 0, change: 0, changeType: "no_change" },
     activeUsersToday: { value: 0, change: 0, changeType: "no_change" },
-    totalRevenue: { value: 0, change: 0, changeType: "no_change" }
-  })
- const getUserGrowthMonth = async()=>{
-  try{
-
-    const response = await apiFunctions.getUsersGrowthMonthly()
-    console.log(response.data)
-    if(response.data.status ===200){
-
-      setUserDataMonth(response.data.data)
+    totalRevenue: { value: 0, change: 0, changeType: "no_change" },
+  });
+  const getUserGrowthMonth = async () => {
+    try {
+      const response = await apiFunctions.getUsersGrowthMonthly();
+      console.log(response.data);
+      if (response.data.status === 200) {
+        setUserDataMonth(response.data.data);
+      }
+    } catch (err) {
+      console.log(err);
     }
-  }catch(err){
-    console.log(err)
-  }
- }
- const getFeatureUsageDistributionAPI = async()=>{
-  try{
-    const response = await apiFunctions.getFeatureUsageDistribution()
-    // Handle both raw array and wrapped { data } formats
-    const raw = Array.isArray(response.data) ? response.data : response.data?.data
-    if(Array.isArray(raw)){
-      const normalized = raw.map((item)=>({
-        name: item.name,
-        value: typeof item.value === 'string' ? parseFloat(item.value) : Number(item.value)
-      }))
-      setFeatureUsageData(normalized)
+  };
+  const getFeatureUsageDistributionAPI = async () => {
+    try {
+      const response = await apiFunctions.getFeatureUsageDistribution();
+      // Handle both raw array and wrapped { data } formats
+      const raw = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data;
+      if (Array.isArray(raw)) {
+        const normalized = raw.map((item) => ({
+          name: item.name,
+          value:
+            typeof item.value === "string"
+              ? parseFloat(item.value)
+              : Number(item.value),
+        }));
+        setFeatureUsageData(normalized);
+      }
+    } catch (err) {
+      console.log(err);
     }
-  }catch(err){
-    console.log(err)
-  }
- }
- const getRevue = async()=>{
-  try{
-
-    const response = await apiFunctions.getMonthlyRevenue()
-    console.log(response.data)
-    if(response.data.status ===200){
-
-      setRevenueData(response.data.data)
+  };
+  const getRevue = async () => {
+    try {
+      const response = await apiFunctions.getMonthlyRevenue();
+      console.log(response.data);
+      if (response.data.status === 200) {
+        setRevenueData(response.data.data);
+      }
+    } catch (err) {
+      console.log(err);
     }
-  }catch(err){
-    console.log(err)
-  }
- }
- const getRecentActivityAPI = async()=>{
-  try{
-
-    const response = await apiFunctions.getRecentActivity()
-    console.log(response.data)
-    if(response.data.status ===200){
-
-      setRecentActivity(response.data.data)
+  };
+  const getRecentActivityAPI = async () => {
+    try {
+      const response = await apiFunctions.getRecentActivity();
+      console.log(response.data);
+      if (response.data.status === 200) {
+        setRecentActivity(response.data.data);
+      }
+    } catch (err) {
+      console.log(err);
     }
-  }catch(err){
-    console.log(err)
-  }
- }
+  };
 
- const getDashboardAPI = async()=>{
-  try{
-    const response = await apiFunctions.getDashboard()
-    const data = response?.data?.data
-    if(response?.data?.status === 200 && data){
-      setDashboardStats({
-        totalUsers: data.totalUsers || { value: 0, change: 0, changeType: "no_change" },
-        activeUsersToday: data.activeUsersToday || { value: 0, change: 0, changeType: "no_change" },
-        totalRevenue: data.totalRevenue || { value: 0, change: 0, changeType: "no_change" }
-      })
+  const getDashboardAPI = async () => {
+    try {
+      const response = await apiFunctions.getDashboard();
+      const data = response?.data?.data;
+      if (response?.data?.status === 200 && data) {
+        setDashboardStats({
+          totalUsers: data.totalUsers || {
+            value: 0,
+            change: 0,
+            changeType: "no_change",
+          },
+          activeUsersToday: data.activeUsersToday || {
+            value: 0,
+            change: 0,
+            changeType: "no_change",
+          },
+          totalRevenue: data.totalRevenue || {
+            value: 0,
+            change: 0,
+            changeType: "no_change",
+          },
+        });
+      }
+    } catch (err) {
+      console.log(err);
     }
-  }catch(err){
-    console.log(err)
-  }
- }
+  };
 
-useEffect(()=>{
-  getUserGrowthMonth()
-  getRevue()
-  getRecentActivityAPI()
-  getFeatureUsageDistributionAPI()
-  getDashboardAPI()
- },[])
+  useEffect(() => {
+    getUserGrowthMonth();
+    getRevue();
+    getRecentActivityAPI();
+    getFeatureUsageDistributionAPI();
+    getDashboardAPI();
+  }, []);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Overview</h1>
-        <p className="text-muted-foreground">Welcome to your Simbli Admin dashboard</p>
+        <p className="text-muted-foreground">
+          Welcome to your Simbli Admin dashboard
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
-          value={dashboardStats.totalUsers.value?.toLocaleString?.() || dashboardStats.totalUsers.value}
+          value={
+            dashboardStats.totalUsers.value?.toLocaleString?.() ||
+            dashboardStats.totalUsers.value
+          }
           icon={Users}
-          trend={{ value: Math.abs(dashboardStats.totalUsers.change || 0), isPositive: (dashboardStats.totalUsers.change || 0) >= 0 }}
+          trend={{
+            value: Math.abs(dashboardStats.totalUsers.change || 0),
+            isPositive: (dashboardStats.totalUsers.change || 0) >= 0,
+          }}
         />
         <StatCard
           title="Active Users (Today)"
-          value={dashboardStats.activeUsersToday.value?.toLocaleString?.() || dashboardStats.activeUsersToday.value}
+          value={
+            dashboardStats.activeUsersToday.value?.toLocaleString?.() ||
+            dashboardStats.activeUsersToday.value
+          }
           icon={UserCheck}
-          trend={{ value: Math.abs(dashboardStats.activeUsersToday.change || 0), isPositive: (dashboardStats.activeUsersToday.change || 0) >= 0 }}
+          trend={{
+            value: Math.abs(dashboardStats.activeUsersToday.change || 0),
+            isPositive: (dashboardStats.activeUsersToday.change || 0) >= 0,
+          }}
         />
         <StatCard
           title="Total Revenue"
-          value={`₹${((dashboardStats.totalRevenue.value || 0) / 100).toLocaleString()}`}
-          icon={DollarSign}
-          trend={{ value: Math.abs(dashboardStats.totalRevenue.change || 0), isPositive: (dashboardStats.totalRevenue.change || 0) >= 0 }}
+          value={`₹${(
+            (dashboardStats.totalRevenue.value || 0) / 100
+          ).toLocaleString()}`}
+          icon={MdCurrencyRupee}
+          trend={{
+            value: Math.abs(dashboardStats.totalRevenue.change || 0),
+            isPositive: (dashboardStats.totalRevenue.change || 0) >= 0,
+          }}
         />
-        <StatCard title="OpenAI Balance" value="$12,450" icon={Wallet} trend={{ value: -15.3, isPositive: false }} />
+        <StatCard
+          title="OpenAI Balance"
+          value="₹12,450"
+          icon={Wallet}
+          trend={{ value: -15.3, isPositive: false }}
+        />
       </div>
 
       {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -196,7 +239,9 @@ useEffect(()=>{
         <Card>
           <CardContent className="p-6">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">AI Words Generated</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                AI Words Generated
+              </p>
               <p className="text-2xl font-bold">12.5M</p>
             </div>
           </CardContent>
@@ -204,7 +249,9 @@ useEffect(()=>{
         <Card>
           <CardContent className="p-6">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Images Created</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Images Created
+              </p>
               <p className="text-2xl font-bold">234K</p>
             </div>
           </CardContent>
@@ -223,11 +270,26 @@ useEffect(()=>{
             <ResponsiveContainer width="100%" height={300}>
               {/* <LineChart data={userGrowthData}> */}
               <LineChart data={userDataMonth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem" }} />
-                <Line type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: "hsl(var(--primary))" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="users"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={{ fill: "hsl(var(--primary))" }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -244,10 +306,13 @@ useEffect(()=>{
             <ResponsiveContainer width="100%" height={300}>
               {/* <BarChart data={revenueData}> */}
               <BarChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                <YAxis 
-                  stroke="hsl(var(--muted-foreground))" 
+                <YAxis
+                  stroke="hsl(var(--muted-foreground))"
                   tickFormatter={(value) => {
                     const inrValue = value / 100;
                     if (inrValue >= 1000) {
@@ -256,11 +321,22 @@ useEffect(()=>{
                     return `₹${inrValue}`;
                   }}
                 />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem" }}
-                  formatter={(value) => [`₹${(value / 100).toLocaleString()}`, 'Revenue']}
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                  }}
+                  formatter={(value) => [
+                    `₹${(value / 100).toLocaleString()}`,
+                    "Revenue",
+                  ]}
                 />
-                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="revenue"
+                  fill="hsl(var(--primary))"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -280,16 +356,27 @@ useEffect(()=>{
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
                   {featureUsageData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -302,22 +389,33 @@ useEffect(()=>{
           <CardContent>
             <div className="space-y-4">
               {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 rounded-lg border border-border p-3">
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-3 rounded-lg border border-border p-3"
+                >
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium">{activity.user}</p>
-                    <p className="text-sm text-muted-foreground">{activity.action}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {activity.action}
+                    </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <Badge
                       variant={
-                        activity.type === "signup" ? "default" :
-                        activity.type === "upgrade" ? "default" :
-                        "secondary"
+                        activity.type === "signup"
+                          ? "default"
+                          : activity.type === "upgrade"
+                          ? "default"
+                          : "secondary"
                       }
                     >
-                      {activity.type}
+                      {/* {activity.type} */}
+                      {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+
                     </Badge>
-                    <span className="text-xs text-muted-foreground">{activity.time}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {activity.time}
+                    </span>
                   </div>
                 </div>
               ))}

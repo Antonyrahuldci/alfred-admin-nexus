@@ -1,5 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { Coins, TrendingUp, AlertTriangle, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,74 +18,133 @@ import { useEffect, useState } from "react";
 import apiFunctions from "@/api/apiFunctions";
 
 const creditsByUser = [
-{ email: "john.doe@email.com", used: 8500, remaining: 1500, plan: "Pro" },
-{ email: "sarah.wilson@email.com", used: 15200, remaining: 4800, plan: "Enterprise" },
-{ email: "mike.johnson@email.com", used: 6700, remaining: 3300, plan: "Pro" },
-{ email: "emma.brown@email.com", used: 19500, remaining: 500, plan: "Enterprise" },
-{ email: "alex.davis@email.com", used: 4200, remaining: 5800, plan: "Pro" }];
-
+  { email: "john.doe@email.com", used: 8500, remaining: 1500, plan: "Pro" },
+  {
+    email: "sarah.wilson@email.com",
+    used: 15200,
+    remaining: 4800,
+    plan: "Enterprise",
+  },
+  { email: "mike.johnson@email.com", used: 6700, remaining: 3300, plan: "Pro" },
+  {
+    email: "emma.brown@email.com",
+    used: 19500,
+    remaining: 500,
+    plan: "Enterprise",
+  },
+  { email: "alex.davis@email.com", used: 4200, remaining: 5800, plan: "Pro" },
+];
 
 const aiModelUsage = [
-{ model: "GPT-4", requests: 12450, tokens: 2340000 },
-{ model: "GPT-3.5", requests: 34200, tokens: 4560000 },
-{ model: "DALL-E 3", requests: 5600, tokens: 0 },
-{ model: "DALL-E 2", requests: 8900, tokens: 0 },
-{ model: "Claude 3", requests: 6700, tokens: 1890000 }
+  { model: "GPT-4", requests: 12450, tokens: 2340000 },
+  { model: "GPT-3.5", requests: 34200, tokens: 4560000 },
+  { model: "DALL-E 3", requests: 5600, tokens: 0 },
+  { model: "DALL-E 2", requests: 8900, tokens: 0 },
+  { model: "Claude 3", requests: 6700, tokens: 1890000 },
 ];
-
 
 const modelDistribution = [
-{ name: "GPT-4", value: 35, color: "hsl(217 91% 60%)" },
-{ name: "GPT-3.5", value: 25, color: "hsl(142 76% 36%)" },
-{ name: "DALL-E", value: 20, color: "hsl(38 92% 50%)" },
-// { name: "Claude", value: 15, color: "hsl(280 65% 60%)" },
-// { name: "Other", value: 5, color: "hsl(200 70% 50%)" }
+  { name: "GPT-4", value: 35, color: "hsl(217 91% 60%)" },
+  { name: "GPT-3.5", value: 25, color: "hsl(142 76% 36%)" },
+  { name: "DALL-E", value: 20, color: "hsl(38 92% 50%)" },
+  // { name: "Claude", value: 15, color: "hsl(280 65% 60%)" },
+  // { name: "Other", value: 5, color: "hsl(200 70% 50%)" }
 ];
-
 
 const featureUsageHeatmap = [
-{ feature: "AI Writer", mon: 450, tue: 520, wed: 480, thu: 510, fri: 590, sat: 320, sun: 280 },
-{ feature: "Image Gen", mon: 280, tue: 310, wed: 295, thu: 340, fri: 380, sat: 420, sun: 390 },
-{ feature: "SERP Tool", mon: 190, tue: 210, wed: 185, thu: 220, fri: 240, sat: 150, sun: 140 },
-{ feature: "Translation", mon: 120, tue: 135, wed: 145, thu: 150, fri: 170, sat: 95, sun: 85 }];
-
-
-const tokenEfficiency = [
-{ output: "Blog Post", avgTokens: 1200, avgCost: 0.024 },
-{ output: "Social Post", avgTokens: 280, avgCost: 0.0056 },
-{ output: "Email", avgTokens: 450, avgCost: 0.009 },
-{ output: "Product Desc", avgTokens: 320, avgCost: 0.0064 }];
-
-
-const depletionAlerts = [
-{ user: "emma.brown@email.com", remaining: 500, plan: "Enterprise", daysLeft: 3 },
-{ user: "chris.lee@email.com", remaining: 1200, plan: "Pro", daysLeft: 7 },
-{ user: "julia.martinez@email.com", remaining: 800, plan: "Pro", daysLeft: 5 }];
-
-
-const avgCreditsData = [
-{ month: "Jan", credits: 3200 },
-{ month: "Feb", credits: 3450 },
-{ month: "Mar", credits: 3820 },
-{ month: "Apr", credits: 4100 },
-{ month: "May", credits: 4380 },
-{ month: "Jun", credits: 4650 },
-{ month: "Jul", credits: 1450 },
-{ month: "Aug", credits: 3200 },
-{ month: "Sep", credits: 4650 },
-{ month: "Oct", credits: 4650 },
-{ month: "Nov", credits: 3200 },
-{ month: "Dec", credits: 8450 },
+  {
+    feature: "AI Writer",
+    mon: 450,
+    tue: 520,
+    wed: 480,
+    thu: 510,
+    fri: 590,
+    sat: 320,
+    sun: 280,
+  },
+  {
+    feature: "Image Gen",
+    mon: 280,
+    tue: 310,
+    wed: 295,
+    thu: 340,
+    fri: 380,
+    sat: 420,
+    sun: 390,
+  },
+  {
+    feature: "SERP Tool",
+    mon: 190,
+    tue: 210,
+    wed: 185,
+    thu: 220,
+    fri: 240,
+    sat: 150,
+    sun: 140,
+  },
+  {
+    feature: "Translation",
+    mon: 120,
+    tue: 135,
+    wed: 145,
+    thu: 150,
+    fri: 170,
+    sat: 95,
+    sun: 85,
+  },
 ];
 
+const tokenEfficiency = [
+  { output: "Blog Post", avgTokens: 1200, avgCost: 0.024 },
+  { output: "Social Post", avgTokens: 280, avgCost: 0.0056 },
+  { output: "Email", avgTokens: 450, avgCost: 0.009 },
+  { output: "Product Desc", avgTokens: 320, avgCost: 0.0064 },
+];
+
+const depletionAlerts = [
+  {
+    user: "emma.brown@email.com",
+    remaining: 500,
+    plan: "Enterprise",
+    daysLeft: 3,
+  },
+  { user: "chris.lee@email.com", remaining: 1200, plan: "Pro", daysLeft: 7 },
+  {
+    user: "julia.martinez@email.com",
+    remaining: 800,
+    plan: "Pro",
+    daysLeft: 5,
+  },
+];
+
+const avgCreditsData = [
+  { month: "Jan", credits: 3200 },
+  { month: "Feb", credits: 3450 },
+  { month: "Mar", credits: 3820 },
+  { month: "Apr", credits: 4100 },
+  { month: "May", credits: 4380 },
+  { month: "Jun", credits: 4650 },
+  { month: "Jul", credits: 1450 },
+  { month: "Aug", credits: 3200 },
+  { month: "Sep", credits: 4650 },
+  { month: "Oct", credits: 4650 },
+  { month: "Nov", credits: 3200 },
+  { month: "Dec", credits: 8450 },
+];
 
 export default function CreditUsage() {
   const [heatmapData, setHeatmapData] = useState(featureUsageHeatmap);
   const [creditsByUserData, setCreditsByUserData] = useState(creditsByUser);
   const [avgCredits, setAvgCredits] = useState(avgCreditsData);
   const [aiModelUsageData, setAiModelUsageData] = useState(aiModelUsage);
-  const [modelDistributionData, setModelDistributionData] = useState(modelDistribution);
-  const [totals, setTotals] = useState({ total_credits_consumed: null, average_credits_per_user: null, total_users: null, timestamp: null });
+  const [modelDistributionData, setModelDistributionData] =
+    useState(modelDistribution);
+  const [totals, setTotals] = useState({
+    total_credits_consumed: null,
+    average_credits_per_user: null,
+    total_users: null,
+    timestamp: null,
+  });
   const fetchHeatmap = async () => {
     const res = await apiFunctions.getFeatureUsageHeatmap(7);
     if (res?.success && Array.isArray(res?.data)) {
@@ -98,7 +168,8 @@ export default function CreditUsage() {
     if (res?.success && Array.isArray(res?.data)) {
       const normalized = res.data.map((item) => ({
         ...item,
-        tokens: typeof item.tokens === 'string' ? Number(item.tokens) : item.tokens
+        tokens:
+          typeof item.tokens === "string" ? Number(item.tokens) : item.tokens,
       }));
       setAiModelUsageData(normalized);
     }
@@ -111,12 +182,12 @@ export default function CreditUsage() {
         "hsl(142 76% 36%)",
         "hsl(38 92% 50%)",
         "hsl(280 65% 60%)",
-        "hsl(200 70% 50%)"
+        "hsl(200 70% 50%)",
       ];
       const normalized = res.data.map((item, index) => ({
         name: item.name,
-        value: typeof item.value === 'string' ? Number(item.value) : item.value,
-        color: COLORS[index % COLORS.length]
+        value: typeof item.value === "string" ? Number(item.value) : item.value,
+        color: COLORS[index % COLORS.length],
       }));
       setModelDistributionData(normalized);
     }
@@ -127,10 +198,19 @@ export default function CreditUsage() {
       // Normalize potential string numbers
       const data = res.data;
       setTotals({
-        total_credits_consumed: typeof data.total_credits_consumed === 'string' ? Number(data.total_credits_consumed) : data.total_credits_consumed,
-        average_credits_per_user: typeof data.average_credits_per_user === 'string' ? Number(data.average_credits_per_user) : data.average_credits_per_user,
-        total_users: typeof data.total_users === 'string' ? Number(data.total_users) : data.total_users,
-        timestamp: data.timestamp || null
+        total_credits_consumed:
+          typeof data.total_credits_consumed === "string"
+            ? Number(data.total_credits_consumed)
+            : data.total_credits_consumed,
+        average_credits_per_user:
+          typeof data.average_credits_per_user === "string"
+            ? Number(data.average_credits_per_user)
+            : data.average_credits_per_user,
+        total_users:
+          typeof data.total_users === "string"
+            ? Number(data.total_users)
+            : data.total_users,
+        timestamp: data.timestamp || null,
       });
     }
   };
@@ -145,8 +225,12 @@ export default function CreditUsage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Credit & Usage Metrics</h1>
-        <p className="text-muted-foreground">Monitor AI usage, credits, and efficiency</p>
+        <h1 className="text-3xl font-bold text-foreground">
+          Credit & Usage Metrics
+        </h1>
+        <p className="text-muted-foreground">
+          Monitor AI usage, credits, and efficiency
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -154,11 +238,15 @@ export default function CreditUsage() {
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Total Credits Used</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Credits Used
+                </p>
                 <p className="text-3xl font-bold">
                   {totals.total_credits_consumed !== null
-                    ? totals.total_credits_consumed.toLocaleString(undefined, { maximumFractionDigits: 2 })
-                    : '—'}
+                    ? totals.total_credits_consumed.toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                      })
+                    : "—"}
                 </p>
               </div>
               <Coins className="h-8 w-8 text-primary" />
@@ -169,11 +257,16 @@ export default function CreditUsage() {
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Avg Credits/User</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Avg Credits/User
+                </p>
                 <p className="text-3xl font-bold">
                   {totals.average_credits_per_user !== null
-                    ? totals.average_credits_per_user.toLocaleString(undefined, { maximumFractionDigits: 2 })
-                    : '—'}
+                    ? totals.average_credits_per_user.toLocaleString(
+                        undefined,
+                        { maximumFractionDigits: 2 }
+                      )
+                    : "—"}
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-primary" />
@@ -216,7 +309,9 @@ export default function CreditUsage() {
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{model.model}</span>
                     <div className="text-right">
-                      <p className="font-bold">{model.requests.toLocaleString()} requests</p>
+                      <p className="font-bold">
+                        {model.requests.toLocaleString()} requests
+                      </p>
                       {model.tokens > 0 && (
                         <p className="text-sm text-muted-foreground">
                           {(model.tokens / 1000000).toFixed(1)}M tokens
@@ -227,7 +322,7 @@ export default function CreditUsage() {
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary transition-all"
-                      style={{ width: `${model.requests / 68850 * 100}%` }}
+                      style={{ width: `${(model.requests / 68850) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -261,7 +356,7 @@ export default function CreditUsage() {
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem"
+                    borderRadius: "0.5rem",
                   }}
                 />
               </PieChart>
@@ -276,25 +371,36 @@ export default function CreditUsage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {creditsByUserData.map((user, idx) => (
-              <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border border-border">
+            {creditsByUserData?.map((user, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border border-border"
+              >
                 <div className="flex-1">
-                  <p className="font-medium">{user.email}</p>
-                  <p className="text-sm text-muted-foreground">{user.plan} Plan</p>
+                  <p className="font-medium">{user?.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.plan} Plan
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-primary">{user.used.toLocaleString()} used</p>
-                  <p className="text-sm text-muted-foreground">{user.remaining.toLocaleString()} remaining</p>
+                  <p className="font-bold text-primary">
+                    {user?.used.toLocaleString()} used
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.remaining.toLocaleString()} remaining
+                  </p>
                 </div>
                 <div className="w-full sm:w-24 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary transition-all"
-                    style={{ width: `${user.used / (user.used + user.remaining) * 100}%` }}
+                    style={{
+                      width: `${
+                        (user?.used / (user?.used + user?.remaining)) * 100
+                      }%`,
+                    }}
                   />
                 </div>
               </div>
-                
-              
             ))}
           </div>
         </CardContent>
@@ -308,17 +414,25 @@ export default function CreditUsage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={avgCredits}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem"
+                    borderRadius: "0.5rem",
                   }}
                 />
-                <Line type="monotone" dataKey="credits" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="credits"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -393,23 +507,30 @@ export default function CreditUsage() {
                 {heatmapData.map((row, idx) => (
                   <tr key={idx} className="border-b">
                     <td className="p-3 font-medium">{row.feature}</td>
-                    {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((day) => {
-                      const value = row[day];
-                      const intensity = Math.min(100, value / 600 * 100);
-                      return (
-                        <td key={day} className="p-3 text-center">
-                          <span
-                            className="inline-block px-3 py-1 rounded"
-                            style={{
-                              backgroundColor: `hsl(217 91% ${100 - intensity / 2}%)`,
-                              color: intensity > 50 ? 'white' : 'hsl(var(--foreground))'
-                            }}
-                          >
-                            {value}
-                          </span>
-                        </td>
-                      );
-                    })}
+                    {["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map(
+                      (day) => {
+                        const value = row[day];
+                        const intensity = Math.min(100, (value / 600) * 100);
+                        return (
+                          <td key={day} className="p-3 text-center">
+                            <span
+                              className="inline-block px-3 py-1 rounded"
+                              style={{
+                                backgroundColor: `hsl(217 91% ${
+                                  100 - intensity / 2
+                                }%)`,
+                                color:
+                                  intensity > 50
+                                    ? "white"
+                                    : "hsl(var(--foreground))",
+                              }}
+                            >
+                              {value}
+                            </span>
+                          </td>
+                        );
+                      }
+                    )}
                   </tr>
                 ))}
               </tbody>
