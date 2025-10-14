@@ -375,6 +375,10 @@ export default function Users() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [userDetailsLoading, setUserDetailsLoading] = useState(false);
+  const [userDetailsData, setUserDetailsData] = useState(null);
+  const [availablePlans, setAvailablePlans] = useState([]);
+  const [plansLoading, setPlansLoading] = useState(false);
 
 const mockUserApi = async (page = 1, limit = 10) => {
   try {
@@ -392,6 +396,41 @@ const mockUserApi = async (page = 1, limit = 10) => {
   }
 };
 
+const fetchUserDetails = async (userId) => {
+  try {
+    setUserDetailsLoading(true);
+    const response = await apiFunctions.getUserUsageData(userId);
+    if (response.data.status === 200) {
+      setUserDetailsData(response.data.data);
+    }
+  } catch (err) {
+    console.log("Error fetching user details:", err);
+    setUserDetailsData(null);
+  } finally {
+    setUserDetailsLoading(false);
+  }
+};
+
+const fetchAllPlans = async () => {
+  try {
+    setPlansLoading(true);
+    const response = await apiFunctions.getAllPlans();
+    if (response.data.status === 200) {
+      setAvailablePlans(response.data.data.plans);
+    }
+  } catch (err) {
+    console.log("Error fetching plans:", err);
+    // Fallback to default plans if API fails
+    setAvailablePlans([
+      { id: 1, name: "Free", price_inr: 0 },
+      { id: 2, name: "Pro", price_inr: 1000 },
+      { id: 3, name: "Enterprise", price_inr: 5000 }
+    ]);
+  } finally {
+    setPlansLoading(false);
+  }
+};
+
 useEffect(() => {
   mockUserApi(currentPage, itemsPerPage);
 }, [currentPage]);
@@ -399,7 +438,15 @@ useEffect(() => {
 // Initial load
 useEffect(() => {
   mockUserApi(1, itemsPerPage);
+  fetchAllPlans();
 }, []);
+
+// Reset user details when modal is closed
+useEffect(() => {
+  if (!selectedUser) {
+    setUserDetailsData(null);
+  }
+}, [selectedUser]);
 
   const toggleUserSelection = (userId) => {
     setSelectedUsers((prev) =>
@@ -416,14 +463,19 @@ useEffect(() => {
     );
   };
 
-  // Client-side filtering (since API doesn't support filtering yet)
+console.log("planFilter", planFilter  )
+console.log("mockUsers",mockUsers )  // Client-side filtering (since API doesn't support filtering yet)
   const filteredAndSortedUsers = mockUsers
     .filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesPlan =
-        planFilter === "all" || user.plan.toLowerCase() === planFilter;
+      
+      // Fix plan filtering to work with dynamic plans
+      const userPlan = user.plan;
+      const matchesPlan = planFilter === "all" || 
+        (userPlan && userPlan.toLowerCase() === planFilter.toLowerCase());
+      
       const matchesActivity =
         activityFilter === "all" ||
         (activityFilter === "active" && isUserActive(user.lastActive)) ||
@@ -450,9 +502,9 @@ useEffect(() => {
     });
 
   // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, planFilter, activityFilter, sortBy]);
+  // useEffect(() => {
+  //   setCurrentPage(1);
+  // }, [searchQuery, planFilter, activityFilter, sortBy]);
 
   // Add User dialog state and helpers
   const [open, setOpen] = useState(false);
@@ -466,31 +518,31 @@ useEffect(() => {
     return password;
   };
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(generatePassword());
-  const [showPassword, setShowPassword] = useState(false);
-  const togglePassword = () => {
-    setShowPassword(!showPassword);
-  };
+  // const [username, setUsername] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState(generatePassword());
+  // const [showPassword, setShowPassword] = useState(false);
+  // const togglePassword = () => {
+  //   setShowPassword(!showPassword);
+  // };
 
-  useEffect(() => {
-    if (open) {
-      setUsername("");
-      setEmail("");
-      setPassword(generatePassword());
-    }
-  }, [open]);
+  // useEffect(() => {
+  //   if (open) {
+  //     setUsername("");
+  //     setEmail("");
+  //     setPassword(generatePassword());
+  //   }
+  // }, [open]);
 
-  const handleAdd = () => {
-    if (!username || !email || !password) return setOpen(false);
-    // Submit logic goes here
-    setOpen(false);
-  };
+  // const handleAdd = () => {
+  //   if (!username || !email || !password) return setOpen(false);
+  //   // Submit logic goes here
+  //   setOpen(false);
+  // };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Users</h1>
           <p className="text-muted-foreground">
@@ -498,10 +550,10 @@ useEffect(() => {
           </p>
         </div>
         <Button onClick={() => setOpen(true)}>Add User</Button>
-      </div>
+      </div> */}
 
       {/* Add User Modal */}
-      <div className="m-3 ">
+      {/* <div className="m-3 ">
         <Dialog open={open} onOpenChange={setOpen} className="Model_Content m-3">
           <DialogContent className=" Model_popups_adduser" >
             <DialogHeader>
@@ -563,10 +615,10 @@ useEffect(() => {
               <button onClick={handleAdd} className="Add_Btn">
                 Add User
               </button>
-            </div>
+            </div> 
           </DialogContent>
         </Dialog>
-      </div>
+      </div> */}
 
       <Card>
         <CardHeader>
@@ -589,9 +641,15 @@ useEffect(() => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Plans</SelectItem>
-                <SelectItem value="free">Free</SelectItem>
-                <SelectItem value="pro">Pro</SelectItem>
-                <SelectItem value="enterprise">Enterprise</SelectItem>
+                {plansLoading ? (
+                  <SelectItem value="loading" disabled>Loading plans...</SelectItem>
+                ) : (
+                  availablePlans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.name.toLowerCase()}>
+                      {plan.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             <Select value={activityFilter} onValueChange={setActivityFilter}>
@@ -741,7 +799,10 @@ useEffect(() => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => setSelectedUser(user)}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            fetchUserDetails(user.id);
+                          }}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -751,102 +812,154 @@ useEffect(() => {
                           <DialogTitle>User Details: {user.name}</DialogTitle>
                         </DialogHeader>
 
-                        <div className="space-y-6 mt-4">
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-muted-foreground">
-                                Email
-                              </p>
-                              <p className="text-sm">{user.email}</p>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-muted-foreground">
-                                Plan
-                              </p>
-                              <Badge>{user.plan}</Badge>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-muted-foreground">
-                                Join Date
-                              </p>
-                              <p className="text-sm">{user.joinDate}</p>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-muted-foreground">
-                                Last Active
-                              </p>
-                              <p className="text-sm">{user.lastActive}</p>
-                            </div>
+                        {userDetailsLoading ? (
+                          <div className="flex justify-center items-center p-8">
+                            <div className="text-muted-foreground">Loading user details...</div>
                           </div>
+                        ) : userDetailsData ? (
+                          <div className="space-y-6 mt-4">
+                            {/* User Details Section */}
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  Email
+                                </p>
+                                <p className="text-sm">{userDetailsData.userDetails.email}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  Plan
+                                </p>
+                                <Badge variant={userDetailsData.subscriptionInfo.status === 'Active' ? 'default' : 'secondary'}>
+                                  {userDetailsData.userDetails.plan}
+                                </Badge>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  Join Date
+                                </p>
+                                <p className="text-sm">{userDetailsData.userDetails.joinDate}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  Last Active
+                                </p>
+                                <p className="text-sm">{userDetailsData.userDetails.lastActive}</p>
+                              </div>
+                            </div>
 
-                          <div>
-                            <h3 className="mb-4 text-lg font-semibold">
-                              Usage Trends
-                            </h3>
-                            <ResponsiveContainer width="100%" height={200}>
-                              <LineChart data={userActivityData}>
-                                <CartesianGrid
-                                  strokeDasharray="3 3"
-                                  stroke="hsl(var(--border))"
-                                />
-                                <XAxis
-                                  dataKey="day"
-                                  stroke="hsl(var(--muted-foreground))"
-                                />
-                                <YAxis stroke="hsl(var(--muted-foreground))" />
-                                <Tooltip
-                                  contentStyle={{
-                                    backgroundColor: "hsl(var(--card))",
-                                    border: "1px solid hsl(var(--border))",
-                                    borderRadius: "0.5rem",
-                                  }}
-                                />
-                                <Line
-                                  type="monotone"
-                                  dataKey="words"
-                                  stroke="hsl(var(--primary))"
-                                  strokeWidth={2}
-                                />
-                                <Line
-                                  type="monotone"
-                                  dataKey="images"
-                                  stroke="hsl(var(--success))"
-                                  strokeWidth={2}
-                                />
-                              </LineChart>
-                            </ResponsiveContainer>
-                          </div>
-
-                          <div>
-                            <h3 className="mb-3 text-lg font-semibold">
-                              Recent Actions
-                            </h3>
-                            <div className="space-y-2">
-                              {[
-                                "Generated 5,000 words of content",
-                                "Created 15 AI images",
-                                "Completed 8 SERP analyses",
-                                "Exported 3 documents",
-                              ].map((action, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center justify-between rounded-lg border border-border p-3"
-                                >
-                                  <span className="text-sm">{action}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {i + 1} day{i > 0 ? "s" : ""} ago
-                                  </span>
+                            {/* Usage Stats Section */}
+                            <div>
+                              <h3 className="mb-4 text-lg font-semibold">
+                                Usage Statistics
+                              </h3>
+                              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-muted-foreground">
+                                    Content Words Used
+                                  </p>
+                                  <p className="text-lg font-semibold">
+                                    {userDetailsData.usageStats.contentWordsUsed.toLocaleString()}
+                                  </p>
                                 </div>
-                              ))}
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-muted-foreground">
+                                    Images Used
+                                  </p>
+                                  <p className="text-lg font-semibold">
+                                    {userDetailsData.usageStats.imagesUsed}
+                                  </p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-muted-foreground">
+                                    SERP Searches
+                                  </p>
+                                  <p className="text-lg font-semibold">
+                                    {userDetailsData.usageStats.serpSearchesUsed}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Usage Trends Chart */}
+                            <div>
+                              <h3 className="mb-4 text-lg font-semibold">
+                                Usage Trends (Last 7 Days)
+                              </h3>
+                              <ResponsiveContainer width="100%" height={200}>
+                                <LineChart data={userDetailsData.usageTrends}>
+                                  <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="hsl(var(--border))"
+                                  />
+                                  <XAxis
+                                    dataKey="day"
+                                    stroke="hsl(var(--muted-foreground))"
+                                  />
+                                  <YAxis stroke="hsl(var(--muted-foreground))" />
+                                  <Tooltip
+                                    contentStyle={{
+                                      backgroundColor: "hsl(var(--card))",
+                                      border: "1px solid hsl(var(--border))",
+                                      borderRadius: "0.5rem",
+                                    }}
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="contentWordsUsed"
+                                    stroke="hsl(var(--primary))"
+                                    strokeWidth={2}
+                                    name="Content Words"
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="imagesUsed"
+                                    stroke="hsl(var(--success))"
+                                    strokeWidth={2}
+                                    name="Images"
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="serpSearchesUsed"
+                                    stroke="hsl(var(--warning))"
+                                    strokeWidth={2}
+                                    name="SERP Searches"
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+
+                            {/* Recent Activities */}
+                            <div>
+                              <h3 className="mb-3 text-lg font-semibold">
+                                Recent Actions
+                              </h3>
+                              <div className="space-y-2">
+                                {userDetailsData.recentActivities && userDetailsData.recentActivities.length > 0 ? (
+                                  userDetailsData.recentActivities.map((activity, i) => (
+                                    <div
+                                      key={i}
+                                      className="flex items-center justify-between rounded-lg border border-border p-3"
+                                    >
+                                      <span className="text-sm">{activity.description}</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {activity.timeAgo}
+                                      </span>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="text-center text-muted-foreground p-4">
+                                    No recent activities found
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
-
-                          {/* <div className="flex gap-2">
-                            <Button variant="outline">Suspend User</Button>
-                            <Button variant="outline">Reset Password</Button>
-                            <Button>Upgrade Plan</Button>
-                          </div> */}
-                        </div>
+                        ) : (
+                          <div className="flex justify-center items-center p-8">
+                            <div className="text-muted-foreground">Failed to load user details</div>
+                          </div>
+                        )}
                       </DialogContent>
                     </Dialog>
                   </TableCell>

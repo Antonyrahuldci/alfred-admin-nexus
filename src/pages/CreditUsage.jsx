@@ -371,6 +371,7 @@ export default function CreditUsage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
+            
             {creditsByUserData?.map((user, idx) => (
               <div
                 key={idx}
@@ -383,12 +384,8 @@ export default function CreditUsage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-primary">
-                    {user?.used.toLocaleString()} used
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {user?.remaining.toLocaleString()} remaining
-                  </p>
+                  <p className="font-bold text-primary">{user?.used.toLocaleString()} used</p>
+                  <p className="text-sm text-muted-foreground">{user?.remaining.toLocaleString()} remaining</p>
                 </div>
                 <div className="w-full sm:w-24 h-2 bg-muted rounded-full overflow-hidden">
                   <div

@@ -49,8 +49,8 @@ const apiFunctions = {
     method.get(`https://backend-alfred.simbli.ai/admin/feature-usage-distribution`),
   getTotalCreditsConsumed: () =>
     method.get(`https://backend-alfred.simbli.ai/admin/total-credits-consumed`),
-  getTopActiveUsers: (limit=5) =>
-    method.get(`https://backend-alfred.simbli.ai/admin/top-active-users?limit=${limit}`),
+  getTopActiveUsers: (limit=5,timeRange) =>
+    method.get(`https://backend-alfred.simbli.ai/admin/top-active-users?limit=${limit}&timeRange=${timeRange}`),
 
   //newAdmin
 
@@ -62,7 +62,10 @@ const apiFunctions = {
   getMockUser: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/users-with-usage?page=${page || 1}&limit=${limit || 10}`),
   getUserPlansData: () => method.get(`${appConstants?.newAdminBaseUrl}/subscription-plans-with-revenue`),
   getPaymentHistory: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/payment-history?page=${page || 1}&limit=${limit || 10}`),
-  getCoupons: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/coupons?page=${page || 1}&limit=${limit || 10}`)
+  getCoupons: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/coupons?page=${page || 1}&limit=${limit || 10}`),
+  getUserUsageData: (userId) => method.get(`${appConstants?.newAdminBaseUrl}/user-usage/${userId}`),
+  getAllPlans: () => method.get(`${appConstants?.newAdminBaseUrl}/all-plans`),
+  getUserByCountry: (timeRange) => method.get(`${appConstants?.newAdminBaseUrl}/getAllUserByCountry?timeRange=${timeRange}`)
 };
 
 export default apiFunctions;
