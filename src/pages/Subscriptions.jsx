@@ -81,6 +81,44 @@ export default function Subscriptions() {
   const [paymentHistory, setPaymentHistory] = useState([])
   const [coupons, setCoupons] = useState([])
   const [couponPagination, setCouponPagination] = useState({ totalPages: 0, totalRecords: 0 })
+
+  const getPlanColorClass = (plan) => {
+    switch (plan) {
+      case "Pro Plan - Monthly":
+      case "Pro Plan - Yearly":
+        return "bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200";
+      case "Standard Plan - Monthly":
+      case "Standard Plan - Yearly":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200";
+      case "Basic Plan - Monthly":
+      case "Basic Plan - Yearly":
+        return "bg-green-100 text-green-800 hover:bg-green-200 border-green-200";
+      case "Trial":
+        return "bg-orange-100 text-orange-800 hover:bg-orange-200 border-orange-200";
+      default:
+        return "bg-slate-100 text-slate-800 hover:bg-slate-200 border-slate-200";
+    }
+  };
+
+  const getStatusColorClass = (status) => {
+    switch (status) {
+      case "Free Trial Cancelled":
+        return "bg-rose-100 text-rose-800 hover:bg-rose-200 border-rose-200";
+      case "Trial":
+        return "bg-orange-100 text-orange-800 hover:bg-orange-200 border-orange-200";
+      case "Active":
+        return "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200";
+      case "Cancelled":
+        return "bg-red-100 text-red-800 hover:bg-red-200 border-red-200";
+      case "Completed":
+        return "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200";
+      case "Failed":
+        return "bg-red-100 text-red-800 hover:bg-red-200 border-red-200";
+      default:
+        return "bg-neutral-100 text-neutral-800 hover:bg-neutral-200 border-neutral-200";
+    }
+  };
+
   const getUserPlansDataApi = async () => {
     const response = await apiFunctions.getUserPlansData();
     console.log(response.data.data);
@@ -284,18 +322,14 @@ export default function Subscriptions() {
                 <TableRow key={payment.id}>
                   <TableCell className="font-medium">{payment.user}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{payment.plan}</Badge>
+                    <Badge className={`TabelCell ${getPlanColorClass(payment.plan)}`}>
+                      {payment.plan}
+                    </Badge>
                   </TableCell>
                   <TableCell className="font-mono">{payment.amount}</TableCell>
                   <TableCell>{payment.date}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        payment.status === "Completed"
-                          ? "default"
-                          : "destructive"
-                      }
-                    >
+                    <Badge className={`TabelCell ${getStatusColorClass(payment.status)}`}>
                       {payment.status}
                     </Badge>
                   </TableCell>

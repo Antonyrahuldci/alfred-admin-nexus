@@ -143,16 +143,16 @@ header {
   position: relative;
   display: flex;
   align-items: center;
-  border: 1px solid #EDEDED;
-  background-color: #F4F4F4;
+  border: 1px solid #ededed;
+  background-color: #f4f4f4;
   border-radius: 8px;
   padding: 0px 10px;
   padding-bottom: 3px;
   /* margin-bottom: 20px; */
 }
 .input-wrapper:focus-within {
-  border-color: #50c36b;        /* green border on focus */
-  background-color: #F5FFF8;    /* light green background on focus */
+  border-color: #50c36b; /* green border on focus */
+  background-color: #f5fff8; /* light green background on focus */
 }
 .input-wrapper input {
   /* background: transparent; */
@@ -165,7 +165,7 @@ header {
   padding: 8px;
   font-size: 17px;
 }
-.input-wrapper input::placeholder{
+.input-wrapper input::placeholder {
   font-size: 15px;
   color: grey;
 }
@@ -186,82 +186,80 @@ header {
   font-size: 22px;
   margin-bottom: 10px;
 }
-.Cancel_btn{
-  background-color: #EAEAEA;
+.Cancel_btn {
+  background-color: #eaeaea;
   height: 35px;
   width: 130px;
   font-weight: 600;
 
-  color: #021E22;
+  color: #021e22;
   font-size: 14px;
   border-radius: 6px;
 }
-.Add_Btn{
+.Add_Btn {
   font-weight: 600;
   background-color: #50c36b !important;
   height: 35px;
   width: 130px;
- color: #fff !important;
+  color: #fff !important;
   font-size: 14px;
   border-radius: 6px;
 }
-.Model_popups{
+.Model_popups {
   height: fit-content;
   max-width: 570px;
   width: 100%;
   overflow-y: hidden;
 }
-.Model_popups_adduser{
+.Model_popups_adduser {
   height: fit-content;
   max-width: 570px;
   width: 100%;
   border-radius: 15px;
- 
 }
-.Eye_Color{
+.Eye_Color {
   color: grey;
 }
-.Model_Content{
+.Model_Content {
   padding: 60px;
-
 }
-.Model_popups{
+.Model_popups {
   border-radius: 15px;
 }
-.clear_bg_btn{
-  background-color: #EAEAEA !important;
+.clear_bg_btn {
+  background-color: #eaeaea !important;
   color: #000 !important;
-  border-color: #EAEAEA !important
+  border-color: #eaeaea !important;
 }
-.send_coupon_bg{
+.send_coupon_bg {
   background-color: #50c36b !important;
   color: #000 !important;
 }
-@media(max-width:450px){
-  .Model_popups{
-  max-width: 360px;
-  width: 100%;
-  height: 90%;
-  border-radius: 15px;
+@media (max-width: 450px) {
+  .Model_popups {
+    max-width: 360px;
+    width: 100%;
+    height: 90%;
+    border-radius: 15px;
+  }
+  .Model_popups_adduser {
+    max-width: 360px;
+    width: 100%;
+    height: unset !important;
+    border-radius: 15px;
+  }
+  .custom-scrollbar {
+    padding-right: 5px;
+    margin-top: 2px;
+    scrollbar-width: none;
+  }
+  .dialog-coupon {
+    max-width: 380px !important;
+    height: 90% !important;
+    border-radius: 15px;
+  }
 }
-.Model_popups_adduser{
-   max-width: 360px;
-  width: 100%;
-  height: unset !important;
-  border-radius: 15px;
-}
-.custom-scrollbar{
-  padding-right: 5px;
-  margin-top: 2px;
-  scrollbar-width: none;
-}
-.dialog-coupon{
-  max-width: 380px !important;
-  height: 90% !important;
-  border-radius: 15px;
-}
-}
-.Recent_Activity{
+.Recent_Activity {
   max-height: 520px;
   overflow-y: auto;
 }
@@ -269,63 +267,65 @@ header {
   color: red;
   background-color: yellow;
 } */
- .Login_Bg{
+.Login_Bg {
   background-image: url("./assets/Images/SimbliBg.png");
   background-size: 100% 100%;
- }
- .Welcome_Back{
-  color: #173E44;
- }
- .Sign_In{
+}
+.Welcome_Back {
+  color: #173e44;
+}
+.Sign_In {
   color: #424242;
- }
- .Sign_In_Btn{
-  background-color: #84E084;
-  color: #173E44;
+}
+.Sign_In_Btn {
+  background-color: #84e084;
+  color: #173e44;
   font-size: 14px;
   font-weight: 600;
- }
- .Main_logo{
+}
+.Main_logo {
   position: fixed;
   top: 10px;
   left: 39px;
- }
- .Input_Field {
-  border: 1px solid #EDEDED;
+}
+.Input_Field {
+  border: 1px solid #ededed;
   border-radius: 8px;
   outline: none;
   font-size: 14px;
 }
 
 .Input_Field:focus {
-  background-color: #F9FFF6 !important; /* soft Excel-like green */
-  border-color: #78DA78;     /* red accent border */
+  background-color: #f9fff6 !important; /* soft Excel-like green */
+  border-color: #78da78; /* red accent border */
 }
 .Input_Field:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px #F9FFF6 inset !important;
-    caret-color: #ffffff;
-  border-color: #78DA78;     /* red accent border */
-
+  -webkit-box-shadow: 0 0 0px 1000px #f9fff6 inset !important;
+  caret-color: #ffffff;
+  border-color: #78da78; /* red accent border */
 }
 /* Change Lock icon color when input is focused */
 /* div:has(.Input_Field:focus) .h-5.w-5 {
   color: #107c41; 
   transition: color 0.3s ease;
 } */
-.Welcome_Admin{
+.Welcome_Admin {
   font-size: 15px;
 }
-.Whole_Contens{
+.Whole_Contens {
   border: 1px solid rgb(219, 219, 219);
 }
-.Labels{
-  color: #2A2A2A;
+.Labels {
+  color: #2a2a2a;
   font-size: 15px;
 }
 .input-wrappers:focus-within .lock-icons {
-  color: #59C959; /* Excel green */
+  color: #59c959; /* Excel green */
 }
 .lock-icons {
   color: #828282; /* gray */
   transition: color 0.3s ease;
+}
+.TabelCell {
+  white-space: nowrap;
 }

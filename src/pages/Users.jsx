@@ -380,73 +380,73 @@ export default function Users() {
   const [availablePlans, setAvailablePlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
 
-const mockUserApi = async (page = 1, limit = 10) => {
-  try {
-    setLoading(true);
-    const response = await apiFunctions.getMockUser(page, limit);
-    if (response.data.status === 200) {
-      setMockUser(response.data.data.users);
-      setTotalPages(response.data.data.pagination.totalPages);
-      setTotalRecords(response.data.data.pagination.totalRecords);
+  const mockUserApi = async (page = 1, limit = 10) => {
+    try {
+      setLoading(true);
+      const response = await apiFunctions.getMockUser(page, limit);
+      if (response.data.status === 200) {
+        setMockUser(response.data.data.users);
+        setTotalPages(response.data.data.pagination.totalPages);
+        setTotalRecords(response.data.data.pagination.totalRecords);
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.log(err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-const fetchUserDetails = async (userId) => {
-  try {
-    setUserDetailsLoading(true);
-    const response = await apiFunctions.getUserUsageData(userId);
-    if (response.data.status === 200) {
-      setUserDetailsData(response.data.data);
+  const fetchUserDetails = async (userId) => {
+    try {
+      setUserDetailsLoading(true);
+      const response = await apiFunctions.getUserUsageData(userId);
+      if (response.data.status === 200) {
+        setUserDetailsData(response.data.data);
+      }
+    } catch (err) {
+      console.log("Error fetching user details:", err);
+      setUserDetailsData(null);
+    } finally {
+      setUserDetailsLoading(false);
     }
-  } catch (err) {
-    console.log("Error fetching user details:", err);
-    setUserDetailsData(null);
-  } finally {
-    setUserDetailsLoading(false);
-  }
-};
+  };
 
-const fetchAllPlans = async () => {
-  try {
-    setPlansLoading(true);
-    const response = await apiFunctions.getAllPlans();
-    if (response.data.status === 200) {
-      setAvailablePlans(response.data.data.plans);
+  const fetchAllPlans = async () => {
+    try {
+      setPlansLoading(true);
+      const response = await apiFunctions.getAllPlans();
+      if (response.data.status === 200) {
+        setAvailablePlans(response.data.data.plans);
+      }
+    } catch (err) {
+      console.log("Error fetching plans:", err);
+      // Fallback to default plans if API fails
+      setAvailablePlans([
+        { id: 1, name: "Free", price_inr: 0 },
+        { id: 2, name: "Pro", price_inr: 1000 },
+        { id: 3, name: "Enterprise", price_inr: 5000 },
+      ]);
+    } finally {
+      setPlansLoading(false);
     }
-  } catch (err) {
-    console.log("Error fetching plans:", err);
-    // Fallback to default plans if API fails
-    setAvailablePlans([
-      { id: 1, name: "Free", price_inr: 0 },
-      { id: 2, name: "Pro", price_inr: 1000 },
-      { id: 3, name: "Enterprise", price_inr: 5000 }
-    ]);
-  } finally {
-    setPlansLoading(false);
-  }
-};
+  };
 
-useEffect(() => {
-  mockUserApi(currentPage, itemsPerPage);
-}, [currentPage]);
+  useEffect(() => {
+    mockUserApi(currentPage, itemsPerPage);
+  }, [currentPage]);
 
-// Initial load
-useEffect(() => {
-  mockUserApi(1, itemsPerPage);
-  fetchAllPlans();
-}, []);
+  // Initial load
+  useEffect(() => {
+    mockUserApi(1, itemsPerPage);
+    fetchAllPlans();
+  }, []);
 
-// Reset user details when modal is closed
-useEffect(() => {
-  if (!selectedUser) {
-    setUserDetailsData(null);
-  }
-}, [selectedUser]);
+  // Reset user details when modal is closed
+  useEffect(() => {
+    if (!selectedUser) {
+      setUserDetailsData(null);
+    }
+  }, [selectedUser]);
 
   const toggleUserSelection = (userId) => {
     setSelectedUsers((prev) =>
@@ -463,19 +463,20 @@ useEffect(() => {
     );
   };
 
-console.log("planFilter", planFilter  )
-console.log("mockUsers",mockUsers )  // Client-side filtering (since API doesn't support filtering yet)
+  console.log("planFilter", planFilter);
+  console.log("mockUsers", mockUsers); // Client-side filtering (since API doesn't support filtering yet)
   const filteredAndSortedUsers = mockUsers
     .filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       // Fix plan filtering to work with dynamic plans
       const userPlan = user.plan;
-      const matchesPlan = planFilter === "all" || 
+      const matchesPlan =
+        planFilter === "all" ||
         (userPlan && userPlan.toLowerCase() === planFilter.toLowerCase());
-      
+
       const matchesActivity =
         activityFilter === "all" ||
         (activityFilter === "active" && isUserActive(user.lastActive)) ||
@@ -539,18 +540,50 @@ console.log("mockUsers",mockUsers )  // Client-side filtering (since API doesn't
   //   // Submit logic goes here
   //   setOpen(false);
   // };
+  const getPlanColorClass = (plan) => {
+    switch (plan) {
+      case "Pro Plan - Monthly":
+      case "Pro Plan - Yearly":
+        return "bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200";
+      case "Standard Plan - Monthly":
+      case "Standard Plan - Yearly":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200";
+      case "Basic Plan - Monthly":
+      case "Basic Plan - Yearly":
+        return "bg-green-100 text-green-800 hover:bg-green-200 border-green-200";
+      case "Trial":
+        return "bg-orange-100 text-orange-800 hover:bg-orange-200 border-orange-200";
+      default:
+        return "bg-slate-100 text-slate-800 hover:bg-slate-200 border-slate-200";
+    }
+  };
+
+  const getStatusColorClass = (status) => {
+    switch (status) {
+      case "Free Trial Cancelled":
+        return "bg-rose-100 text-rose-800 hover:bg-rose-200 border-rose-200";
+      case "Trial":
+        return "bg-orange-100 text-orange-800 hover:bg-orange-200 border-orange-200";
+      case "Active":
+        return "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200";
+      case "Cancelled":
+        return "bg-red-100 text-red-800 hover:bg-red-200 border-red-200";
+      default:
+        return "bg-neutral-100 text-neutral-800 hover:bg-neutral-200 border-neutral-200";
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Users</h1>
           <p className="text-muted-foreground">
             Manage and monitor all platform users
           </p>
         </div>
-        <Button onClick={() => setOpen(true)}>Add User</Button>
-      </div> */}
+        {/* <Button onClick={() => setOpen(true)}>Add User</Button> */}
+      </div>
 
       {/* Add User Modal */}
       {/* <div className="m-3 ">
@@ -642,7 +675,9 @@ console.log("mockUsers",mockUsers )  // Client-side filtering (since API doesn't
               <SelectContent>
                 <SelectItem value="all">All Plans</SelectItem>
                 {plansLoading ? (
-                  <SelectItem value="loading" disabled>Loading plans...</SelectItem>
+                  <SelectItem value="loading" disabled>
+                    Loading plans...
+                  </SelectItem>
                 ) : (
                   availablePlans.map((plan) => (
                     <SelectItem key={plan.id} value={plan.name.toLowerCase()}>
@@ -710,9 +745,9 @@ console.log("mockUsers",mockUsers )  // Client-side filtering (since API doesn't
             </div>
           ) : (
             <Table>
-            <TableHeader>
-              <TableRow>
-                {/* <TableHead className="w-12">
+              <TableHeader className="Tabel_Head">
+                <TableRow>
+                  {/* <TableHead className="w-12">
                   <Checkbox
                     checked={
                       selectedUsers.length === filteredAndSortedUsers.length &&
@@ -729,244 +764,262 @@ console.log("mockUsers",mockUsers )  // Client-side filtering (since API doesn't
                     }}
                   />
                 </TableHead> */}
-                <TableHead>S.No</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Join Date</TableHead>
-                <TableHead>Last Active</TableHead>
-                <TableHead className="text-right">Words</TableHead>
-                <TableHead className="text-right">Images</TableHead>
-                <TableHead className="text-right">SERP</TableHead>
-                <TableHead className="w-12" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAndSortedUsers.map((user, index) => (
-                <TableRow key={user.id}>
-                  {/* <TableCell>
+                  <TableHead>S.No</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead>Last Active</TableHead>
+                  <TableHead className="text-right">Words</TableHead>
+                  <TableHead className="text-right">Images</TableHead>
+                  <TableHead className="text-right">SERP</TableHead>
+                  <TableHead>View More</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAndSortedUsers.map((user, index) => (
+                  <TableRow key={user.id}>
+                    {/* <TableCell>
                     <Checkbox
                       checked={selectedUsers.includes(user.id)}
                       onCheckedChange={() => toggleUserSelection(user.id)}
                     />
                   </TableCell> */}
-                  <TableCell className="font-medium">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        user.plan === "Enterprise"
-                          ? "default"
-                          : user.plan === "Pro"
-                            ? "default"
-                            : "secondary"
-                      }
-                    >
-                      {user.plan}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        user.plan === "Enterprise"
-                          ? "default"
-                          : user.plan === "Pro"
-                            ? "default"
-                            : "secondary"
-                      }
-                    >
-                      {user.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{user.joinDate}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {user.lastActive}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {user.wordCount.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {user.images}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {user.serpUsage}
-                  </TableCell>
-                  <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            fetchUserDetails(user.id);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl Model_popups">
-                        <DialogHeader>
-                          <DialogTitle>User Details: {user.name}</DialogTitle>
-                        </DialogHeader>
+                    <TableCell className="font-medium">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </TableCell>
+                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`TabelCell ${getPlanColorClass(user.plan)}`}
+                      >
+                        {user.plan}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`TabelCell ${getStatusColorClass(
+                          user.status
+                        )}`}
+                      >
+                        {user.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="TabelCell">{user.joinDate}</TableCell>
+                    <TableCell className="text-muted-foreground TabelCell">
+                      {user.lastActive}
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {user.wordCount.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {user.images}
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {user.serpUsage}
+                    </TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              fetchUserDetails(user.id);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl Model_popups">
+                          <DialogHeader>
+                            <DialogTitle>User Details: {user.name}</DialogTitle>
+                          </DialogHeader>
 
-                        {userDetailsLoading ? (
-                          <div className="flex justify-center items-center p-8">
-                            <div className="text-muted-foreground">Loading user details...</div>
-                          </div>
-                        ) : userDetailsData ? (
-                          <div className="space-y-6 mt-4">
-                            {/* User Details Section */}
-                            <div className="grid gap-4 md:grid-cols-2">
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  Email
-                                </p>
-                                <p className="text-sm">{userDetailsData.userDetails.email}</p>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  Plan
-                                </p>
-                                <Badge variant={userDetailsData.subscriptionInfo.status === 'Active' ? 'default' : 'secondary'}>
-                                  {userDetailsData.userDetails.plan}
-                                </Badge>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  Join Date
-                                </p>
-                                <p className="text-sm">{userDetailsData.userDetails.joinDate}</p>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  Last Active
-                                </p>
-                                <p className="text-sm">{userDetailsData.userDetails.lastActive}</p>
+                          {userDetailsLoading ? (
+                            <div className="flex justify-center items-center p-8">
+                              <div className="text-muted-foreground">
+                                Loading user details...
                               </div>
                             </div>
-
-                            {/* Usage Stats Section */}
-                            <div>
-                              <h3 className="mb-4 text-lg font-semibold">
-                                Usage Statistics
-                              </h3>
-                              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                          ) : userDetailsData ? (
+                            <div className="space-y-6 mt-4">
+                              {/* User Details Section */}
+                              <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-1">
                                   <p className="text-sm font-medium text-muted-foreground">
-                                    Content Words Used
+                                    Email
                                   </p>
-                                  <p className="text-lg font-semibold">
-                                    {userDetailsData.usageStats.contentWordsUsed.toLocaleString()}
+                                  <p className="text-sm">
+                                    {userDetailsData.userDetails.email}
                                   </p>
                                 </div>
                                 <div className="space-y-1">
                                   <p className="text-sm font-medium text-muted-foreground">
-                                    Images Used
+                                    Plan
                                   </p>
-                                  <p className="text-lg font-semibold">
-                                    {userDetailsData.usageStats.imagesUsed}
+                                  <Badge
+                                    variant={
+                                      userDetailsData.subscriptionInfo
+                                        .status === "Active"
+                                        ? "default"
+                                        : "secondary"
+                                    }
+                                  >
+                                    {userDetailsData.userDetails.plan}
+                                  </Badge>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-muted-foreground">
+                                    Join Date
+                                  </p>
+                                  <p className="text-sm">
+                                    {userDetailsData.userDetails.joinDate}
                                   </p>
                                 </div>
                                 <div className="space-y-1">
                                   <p className="text-sm font-medium text-muted-foreground">
-                                    SERP Searches
+                                    Last Active
                                   </p>
-                                  <p className="text-lg font-semibold">
-                                    {userDetailsData.usageStats.serpSearchesUsed}
+                                  <p className="text-sm">
+                                    {userDetailsData.userDetails.lastActive}
                                   </p>
                                 </div>
                               </div>
-                            </div>
 
-                            {/* Usage Trends Chart */}
-                            <div>
-                              <h3 className="mb-4 text-lg font-semibold">
-                                Usage Trends (Last 7 Days)
-                              </h3>
-                              <ResponsiveContainer width="100%" height={200}>
-                                <LineChart data={userDetailsData.usageTrends}>
-                                  <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    stroke="hsl(var(--border))"
-                                  />
-                                  <XAxis
-                                    dataKey="day"
-                                    stroke="hsl(var(--muted-foreground))"
-                                  />
-                                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                                  <Tooltip
-                                    contentStyle={{
-                                      backgroundColor: "hsl(var(--card))",
-                                      border: "1px solid hsl(var(--border))",
-                                      borderRadius: "0.5rem",
-                                    }}
-                                  />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="contentWordsUsed"
-                                    stroke="hsl(var(--primary))"
-                                    strokeWidth={2}
-                                    name="Content Words"
-                                  />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="imagesUsed"
-                                    stroke="hsl(var(--success))"
-                                    strokeWidth={2}
-                                    name="Images"
-                                  />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="serpSearchesUsed"
-                                    stroke="hsl(var(--warning))"
-                                    strokeWidth={2}
-                                    name="SERP Searches"
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-
-                            {/* Recent Activities */}
-                            <div>
-                              <h3 className="mb-3 text-lg font-semibold">
-                                Recent Actions
-                              </h3>
-                              <div className="space-y-2">
-                                {userDetailsData.recentActivities && userDetailsData.recentActivities.length > 0 ? (
-                                  userDetailsData.recentActivities.map((activity, i) => (
-                                    <div
-                                      key={i}
-                                      className="flex items-center justify-between rounded-lg border border-border p-3"
-                                    >
-                                      <span className="text-sm">{activity.description}</span>
-                                      <span className="text-xs text-muted-foreground">
-                                        {activity.timeAgo}
-                                      </span>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="text-center text-muted-foreground p-4">
-                                    No recent activities found
+                              {/* Usage Stats Section */}
+                              <div>
+                                <h3 className="mb-4 text-lg font-semibold">
+                                  Usage Statistics
+                                </h3>
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                      Content Words Used
+                                    </p>
+                                    <p className="text-lg font-semibold">
+                                      {userDetailsData.usageStats.contentWordsUsed.toLocaleString()}
+                                    </p>
                                   </div>
-                                )}
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                      Images Used
+                                    </p>
+                                    <p className="text-lg font-semibold">
+                                      {userDetailsData.usageStats.imagesUsed}
+                                    </p>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                      SERP Searches
+                                    </p>
+                                    <p className="text-lg font-semibold">
+                                      {
+                                        userDetailsData.usageStats
+                                          .serpSearchesUsed
+                                      }
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Usage Trends Chart */}
+                              <div>
+                                <h3 className="mb-4 text-lg font-semibold">
+                                  Usage Trends (Last 7 Days)
+                                </h3>
+                                <ResponsiveContainer width="100%" height={200}>
+                                  <LineChart data={userDetailsData.usageTrends}>
+                                    <CartesianGrid
+                                      strokeDasharray="3 3"
+                                      stroke="hsl(var(--border))"
+                                    />
+                                    <XAxis
+                                      dataKey="day"
+                                      stroke="hsl(var(--muted-foreground))"
+                                    />
+                                    <YAxis stroke="hsl(var(--muted-foreground))" />
+                                    <Tooltip
+                                      contentStyle={{
+                                        backgroundColor: "hsl(var(--card))",
+                                        border: "1px solid hsl(var(--border))",
+                                        borderRadius: "0.5rem",
+                                      }}
+                                    />
+                                    <Line
+                                      type="monotone"
+                                      dataKey="contentWordsUsed"
+                                      stroke="hsl(var(--primary))"
+                                      strokeWidth={2}
+                                      name="Content Words"
+                                    />
+                                    <Line
+                                      type="monotone"
+                                      dataKey="imagesUsed"
+                                      stroke="hsl(var(--success))"
+                                      strokeWidth={2}
+                                      name="Images"
+                                    />
+                                    <Line
+                                      type="monotone"
+                                      dataKey="serpSearchesUsed"
+                                      stroke="hsl(var(--warning))"
+                                      strokeWidth={2}
+                                      name="SERP Searches"
+                                    />
+                                  </LineChart>
+                                </ResponsiveContainer>
+                              </div>
+
+                              {/* Recent Activities */}
+                              <div>
+                                <h3 className="mb-3 text-lg font-semibold">
+                                  Recent Actions
+                                </h3>
+                                <div className="space-y-2">
+                                  {userDetailsData.recentActivities &&
+                                  userDetailsData.recentActivities.length >
+                                    0 ? (
+                                    userDetailsData.recentActivities.map(
+                                      (activity, i) => (
+                                        <div
+                                          key={i}
+                                          className="flex items-center justify-between rounded-lg border border-border p-3"
+                                        >
+                                          <span className="text-sm">
+                                            {activity.description}
+                                          </span>
+                                          <span className="text-xs text-muted-foreground">
+                                            {activity.timeAgo}
+                                          </span>
+                                        </div>
+                                      )
+                                    )
+                                  ) : (
+                                    <div className="text-center text-muted-foreground p-4">
+                                      No recent activities found
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="flex justify-center items-center p-8">
-                            <div className="text-muted-foreground">Failed to load user details</div>
-                          </div>
-                        )}
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          ) : (
+                            <div className="flex justify-center items-center p-8">
+                              <div className="text-muted-foreground">
+                                Failed to load user details
+                              </div>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
