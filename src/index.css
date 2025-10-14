@@ -269,3 +269,63 @@ header {
   color: red;
   background-color: yellow;
 } */
+ .Login_Bg{
+  background-image: url("./assets/Images/SimbliBg.png");
+  background-size: 100% 100%;
+ }
+ .Welcome_Back{
+  color: #173E44;
+ }
+ .Sign_In{
+  color: #424242;
+ }
+ .Sign_In_Btn{
+  background-color: #84E084;
+  color: #173E44;
+  font-size: 14px;
+  font-weight: 600;
+ }
+ .Main_logo{
+  position: fixed;
+  top: 10px;
+  left: 39px;
+ }
+ .Input_Field {
+  border: 1px solid #EDEDED;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+}
+
+.Input_Field:focus {
+  background-color: #F9FFF6 !important; /* soft Excel-like green */
+  border-color: #78DA78;     /* red accent border */
+}
+.Input_Field:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #F9FFF6 inset !important;
+    caret-color: #ffffff;
+  border-color: #78DA78;     /* red accent border */
+
+}
+/* Change Lock icon color when input is focused */
+/* div:has(.Input_Field:focus) .h-5.w-5 {
+  color: #107c41; 
+  transition: color 0.3s ease;
+} */
+.Welcome_Admin{
+  font-size: 15px;
+}
+.Whole_Contens{
+  border: 1px solid rgb(219, 219, 219);
+}
+.Labels{
+  color: #2A2A2A;
+  font-size: 15px;
+}
+.input-wrappers:focus-within .lock-icons {
+  color: #59C959; /* Excel green */
+}
+.lock-icons {
+  color: #828282; /* gray */
+  transition: color 0.3s ease;
+}

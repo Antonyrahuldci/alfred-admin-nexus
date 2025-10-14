@@ -70,18 +70,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 via-emerald-600 to-green-900 px-4 py-3">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-5">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 via-emerald-600 to-green-900 px-4 py-3 Login_Bg">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] p-5 Whole_Contens">
         {/* Header with Logo */}
         <div className="text-center mb-6">
           <img
             src={mainlogo}
             alt="Logo"
-            className="mx-auto mb-4 mt-3"
+            className="mx-auto mb-4 mt-3 Main_logo"
             style={{ width: "140px", objectFit: "contain" }}
           />
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <h2 className="text-3xl font-bold Welcome_Back">Welcome Back <span className="Welcome_Admin">(Admin)</span> </h2>
+          <p className="mt-0 text-sm Sign_In">
             Please sign in to continue
           </p>
         </div>
@@ -92,13 +92,13 @@ export default function Login() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium Labels"
             >
               Email address
             </label>
-            <div className="mt-2 relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <AtSymbolIcon className="h-5 w-5 text-gray-400" />
+            <div className="mt-2 relative input-wrappers">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none lock-icons">
+                <AtSymbolIcon className="h-5 w-5 " />
               </span>
               <input
                 type="email"
@@ -107,11 +107,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-3 py-3 rounded-lg 
-                           border border-gray-300 
-                           text-gray-900 placeholder-gray-400 
-                           focus:ring-2 focus:ring-[#22c55e] focus:border-[#22c55e] 
-                           sm:text-sm transition"
+                className="w-full pl-10 pr-3 py-3 rounded-lg Input_Field"
                 placeholder="you@example.com"
               />
             </div>
@@ -121,14 +117,14 @@ export default function Login() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium Labels"
             >
               Password
             </label>
-            <div className="mt-2 relative">
+            <div className="mt-2 relative input-wrappers">
               {/* Lock icon */}
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="h-5 w-5 text-gray-400" />
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none lock-icons">
+                <LockClosedIcon className="h-5 w-5 " />
               </span>
 
               {/* Password input */}
@@ -139,18 +135,14 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 rounded-lg 
-                           border border-gray-300 
-                           text-gray-900 placeholder-gray-400 
-                           focus:ring-2 focus:ring-[#22c55e] focus:border-[#22c55e] 
-                           sm:text-sm transition"
+                className="w-full pl-10 pr-10 py-3 rounded-lg Input_Field" 
                 placeholder="••••••••"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center  lock-icons"
               >
                 {showPassword ? (
                   <EyeSlashIcon className="h-5 w-5" />
@@ -164,11 +156,8 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-lg text-sm font-semibold 
-                       text-white bg-[#22c55e] 
-                       hover:bg-green-600 
-                       focus:outline-none focus:ring-2 focus:ring-[#22c55e] 
-                       disabled:opacity-50 transition shadow-md"
+            className="w-full py-3 px-4 rounded-lg  
+                       disabled:opacity-50 transition Sign_In_Btn"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
