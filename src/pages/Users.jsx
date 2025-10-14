@@ -377,6 +377,8 @@ export default function Users() {
   const [loading, setLoading] = useState(false);
   const [userDetailsLoading, setUserDetailsLoading] = useState(false);
   const [userDetailsData, setUserDetailsData] = useState(null);
+  const [availablePlans, setAvailablePlans] = useState([]);
+  const [plansLoading, setPlansLoading] = useState(false);
 
 const mockUserApi = async (page = 1, limit = 10) => {
   try {
@@ -409,6 +411,26 @@ const fetchUserDetails = async (userId) => {
   }
 };
 
+const fetchAllPlans = async () => {
+  try {
+    setPlansLoading(true);
+    const response = await apiFunctions.getAllPlans();
+    if (response.data.status === 200) {
+      setAvailablePlans(response.data.data.plans);
+    }
+  } catch (err) {
+    console.log("Error fetching plans:", err);
+    // Fallback to default plans if API fails
+    setAvailablePlans([
+      { id: 1, name: "Free", price_inr: 0 },
+      { id: 2, name: "Pro", price_inr: 1000 },
+      { id: 3, name: "Enterprise", price_inr: 5000 }
+    ]);
+  } finally {
+    setPlansLoading(false);
+  }
+};
+
 useEffect(() => {
   mockUserApi(currentPage, itemsPerPage);
 }, [currentPage]);
@@ -416,6 +438,7 @@ useEffect(() => {
 // Initial load
 useEffect(() => {
   mockUserApi(1, itemsPerPage);
+  fetchAllPlans();
 }, []);
 
 // Reset user details when modal is closed
@@ -440,14 +463,19 @@ useEffect(() => {
     );
   };
 
-  // Client-side filtering (since API doesn't support filtering yet)
+console.log("planFilter", planFilter  )
+console.log("mockUsers",mockUsers )  // Client-side filtering (since API doesn't support filtering yet)
   const filteredAndSortedUsers = mockUsers
     .filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesPlan =
-        planFilter === "all" || user.plan.toLowerCase() === planFilter;
+      
+      // Fix plan filtering to work with dynamic plans
+      const userPlan = user.plan;
+      const matchesPlan = planFilter === "all" || 
+        (userPlan && userPlan.toLowerCase() === planFilter.toLowerCase());
+      
       const matchesActivity =
         activityFilter === "all" ||
         (activityFilter === "active" && isUserActive(user.lastActive)) ||
@@ -474,9 +502,9 @@ useEffect(() => {
     });
 
   // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, planFilter, activityFilter, sortBy]);
+  // useEffect(() => {
+  //   setCurrentPage(1);
+  // }, [searchQuery, planFilter, activityFilter, sortBy]);
 
   // Add User dialog state and helpers
   const [open, setOpen] = useState(false);
@@ -490,31 +518,31 @@ useEffect(() => {
     return password;
   };
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(generatePassword());
-  const [showPassword, setShowPassword] = useState(false);
-  const togglePassword = () => {
-    setShowPassword(!showPassword);
-  };
+  // const [username, setUsername] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState(generatePassword());
+  // const [showPassword, setShowPassword] = useState(false);
+  // const togglePassword = () => {
+  //   setShowPassword(!showPassword);
+  // };
 
-  useEffect(() => {
-    if (open) {
-      setUsername("");
-      setEmail("");
-      setPassword(generatePassword());
-    }
-  }, [open]);
+  // useEffect(() => {
+  //   if (open) {
+  //     setUsername("");
+  //     setEmail("");
+  //     setPassword(generatePassword());
+  //   }
+  // }, [open]);
 
-  const handleAdd = () => {
-    if (!username || !email || !password) return setOpen(false);
-    // Submit logic goes here
-    setOpen(false);
-  };
+  // const handleAdd = () => {
+  //   if (!username || !email || !password) return setOpen(false);
+  //   // Submit logic goes here
+  //   setOpen(false);
+  // };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Users</h1>
           <p className="text-muted-foreground">
@@ -522,10 +550,10 @@ useEffect(() => {
           </p>
         </div>
         <Button onClick={() => setOpen(true)}>Add User</Button>
-      </div>
+      </div> */}
 
       {/* Add User Modal */}
-      <div className="m-3 ">
+      {/* <div className="m-3 ">
         <Dialog open={open} onOpenChange={setOpen} className="Model_Content m-3">
           <DialogContent className=" Model_popups_adduser" >
             <DialogHeader>
@@ -587,10 +615,10 @@ useEffect(() => {
               <button onClick={handleAdd} className="Add_Btn">
                 Add User
               </button>
-            </div>
+            </div> 
           </DialogContent>
         </Dialog>
-      </div>
+      </div> */}
 
       <Card>
         <CardHeader>
@@ -613,9 +641,15 @@ useEffect(() => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Plans</SelectItem>
-                <SelectItem value="free">Free</SelectItem>
-                <SelectItem value="pro">Pro</SelectItem>
-                <SelectItem value="enterprise">Enterprise</SelectItem>
+                {plansLoading ? (
+                  <SelectItem value="loading" disabled>Loading plans...</SelectItem>
+                ) : (
+                  availablePlans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.name.toLowerCase()}>
+                      {plan.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             <Select value={activityFilter} onValueChange={setActivityFilter}>

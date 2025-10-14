@@ -35,14 +35,14 @@ import apiFunctions from "../api/apiFunctions";
 //   { date: "Feb 5", users: 134 }
 // ];
 
-const topCountriesData = [
-  { country: "United States", users: 1845, percent: 35 },
-  { country: "United Kingdom", users: 892, percent: 17 },
-  { country: "Canada", users: 634, percent: 12 },
-  { country: "Germany", users: 523, percent: 10 },
-  { country: "Australia", users: 456, percent: 9 },
-  { country: "Others", users: 884, percent: 17 },
-];
+// const topCountriesData = [
+//   { country: "United States", users: 1845, percent: 35 },
+//   { country: "United Kingdom", users: 892, percent: 17 },
+//   { country: "Canada", users: 634, percent: 12 },
+//   { country: "Germany", users: 523, percent: 10 },
+//   { country: "Australia", users: 456, percent: 9 },
+//   { country: "Others", users: 884, percent: 17 },
+// ];
 
 const COLORS = [
   "hsl(217 91% 60%)",
@@ -93,16 +93,16 @@ export default function UserAnalytics() {
   const [growthData, setGrowthData] = useState([]);
   const [timeRange, setTimeRange] = useState("30days");
   const [topActiveUsers, setTopActiveUsers] = useState([]);
-  
+
   const userGrowthAPI = async (selectedTimeRange = timeRange) => {
     try {
       // Map frontend time range values to backend expected values
       const timeRangeMap = {
         "7days": "7",
-        "30days": "30", 
+        "30days": "30",
         "90days": "90"
       };
-      
+
       const backendTimeRange = timeRangeMap[selectedTimeRange] || "30";
       const response = await apiFunctions.getUsersGrowth(backendTimeRange);
       console.log(response);
@@ -116,17 +116,26 @@ export default function UserAnalytics() {
 
   useEffect(() => {
     userGrowthAPI();
+    getAllUserByCountryApi()
+    fetchTopActiveUsers()
   }, [timeRange]);
   console.log("growthData", growthData);
-  const fetchTopActiveUsers = async (limit=5) => {
+
+  const fetchTopActiveUsers = async (limit = 5,selectedTimeRange=timeRange) => {
     try {
-      const response = await apiFunctions.getTopActiveUsers(limit);
+      const timeRangeMap = {
+        "7days": "7",
+        "30days": "30",
+        "90days": "90"
+      };
+       const backendTimeRange = timeRangeMap[selectedTimeRange] || "30";
+      const response = await apiFunctions.getTopActiveUsers(limit,backendTimeRange);
       // Response is an array per provided endpoint
       const users = Array.isArray(response?.data)
         ? response.data
         : Array.isArray(response?.data?.data)
-        ? response.data.data
-        : [];
+          ? response.data.data
+          : [];
 
       const mapped = users.map((u) => ({
         name: u.email,
@@ -139,11 +148,37 @@ export default function UserAnalytics() {
       setTopActiveUsers([]);
     }
   };
-  useEffect(() => {
+  // useEffect(() => {
 
 
-    fetchTopActiveUsers();
-  }, []);
+  //   fetchTopActiveUsers();
+
+  // }, []);
+
+  const [topCountriesData, setTopCountryData] = useState([])
+
+
+
+  const getAllUserByCountryApi = async (selectedTimeRange = timeRange) => {
+    try {
+      // Map frontend time range values to backend expected values
+      const timeRangeMap = {
+        "7days": "7",
+        "30days": "30",
+        "90days": "90"
+      };
+
+      const backendTimeRange = timeRangeMap[selectedTimeRange] || "30";
+      const response = await apiFunctions.getUserByCountry(backendTimeRange);
+      console.log(response);
+      if (response.data.status === "success") {
+        setTopCountryData(response.data.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
