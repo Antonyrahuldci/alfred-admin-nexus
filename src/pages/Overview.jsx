@@ -206,12 +206,12 @@ export default function Overview() {
             isPositive: (dashboardStats.totalRevenue.change || 0) >= 0,
           }}
         />
-        <StatCard
+        {/* <StatCard
           title="OpenAI Balance"
           value="₹12,450"
           icon={Wallet}
           trend={{ value: -15.3, isPositive: false }}
-        />
+        /> */}
       </div>
 
       {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -238,7 +238,7 @@ export default function Overview() {
             </div>
           </CardContent>
         </Card> */}
-        <Card>
+        {/* <Card>
           <CardContent className="p-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
@@ -247,8 +247,8 @@ export default function Overview() {
               <p className="text-2xl font-bold">12.5M</p>
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </Card> */}
+        {/* <Card>
           <CardContent className="p-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
@@ -257,7 +257,7 @@ export default function Overview() {
               <p className="text-2xl font-bold">234K</p>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

@@ -133,12 +133,12 @@ const avgCreditsData = [
 ];
 
 export default function CreditUsage() {
-  const [heatmapData, setHeatmapData] = useState(featureUsageHeatmap);
-  const [creditsByUserData, setCreditsByUserData] = useState(creditsByUser);
-  const [avgCredits, setAvgCredits] = useState(avgCreditsData);
-  const [aiModelUsageData, setAiModelUsageData] = useState(aiModelUsage);
+  const [heatmapData, setHeatmapData] = useState([]);
+  const [creditsByUserData, setCreditsByUserData] = useState([]);
+  const [avgCredits, setAvgCredits] = useState([]);
+  const [aiModelUsageData, setAiModelUsageData] = useState([]);
   const [modelDistributionData, setModelDistributionData] =
-    useState(modelDistribution);
+    useState([]);
   const [totals, setTotals] = useState({
     total_credits_consumed: null,
     average_credits_per_user: null,
