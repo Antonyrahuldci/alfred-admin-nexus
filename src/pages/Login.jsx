@@ -1,4 +1,6 @@
 import React, { useState, useCallback } from "react";
+import { jwtDecode } from "jwt-decode";
+
 import {
   AtSymbolIcon,
   LockClosedIcon,
@@ -47,9 +49,23 @@ export default function Login() {
       const response = await apiFunctions.login({ email, password });
       if (response?.status === 200) {
         const token = response.data.token;
-        const username = response.data.data.username;
         localStorage.setItem("access-token", token);
-        localStorage.setItem("user", username);
+
+        // Decode once and persist email/username from token payload
+        try {
+          const decoded = jwtDecode(token);
+          const emailFromToken = decoded?.email;
+          const roleFromToken = decoded?.role;
+
+          if (emailFromToken) {
+            localStorage.setItem("email", String(emailFromToken));
+          }
+          if (roleFromToken) {
+            localStorage.setItem("role", String(roleFromToken));
+          }
+        } catch (decodeErr) {
+          console.error("Failed to decode JWT:", decodeErr);
+        }
 
         // if (onLoginSuccess) onLoginSuccess();
 
@@ -135,7 +151,7 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 rounded-lg Input_Field" 
+                className="w-full pl-10 pr-10 py-3 rounded-lg Input_Field"
                 placeholder="••••••••"
               />
 

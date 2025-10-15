@@ -27,6 +27,7 @@ import {
 } from "recharts";
 import { useEffect, useState } from "react";
 import apiFunctions from "../api/apiFunctions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // const userGrowthData = [
 //   { month: "Jan", users: 1200 },
@@ -68,6 +69,12 @@ export default function Overview() {
     activeUsersToday: { value: 0, change: 0, changeType: "no_change" },
     totalRevenue: { value: 0, change: 0, changeType: "no_change" },
   });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingUserGrowth, setLoadingUserGrowth] = useState(true);
+  const [loadingRevenue, setLoadingRevenue] = useState(true);
+  const [loadingFeature, setLoadingFeature] = useState(true);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+
   const getUserGrowthMonth = async () => {
     try {
       const response = await apiFunctions.getUsersGrowthMonthly();
@@ -77,6 +84,8 @@ export default function Overview() {
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoadingUserGrowth(false);
     }
   };
   const getFeatureUsageDistributionAPI = async () => {
@@ -98,6 +107,8 @@ export default function Overview() {
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoadingFeature(false);
     }
   };
   const getRevue = async () => {
@@ -109,6 +120,8 @@ export default function Overview() {
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoadingRevenue(false);
     }
   };
   const getRecentActivityAPI = async () => {
@@ -122,6 +135,8 @@ export default function Overview() {
       }
     } catch (err) {
       console.log("Recent Activity API Error:", err);
+    } finally {
+      setLoadingActivity(false);
     }
   };
 
@@ -150,6 +165,8 @@ export default function Overview() {
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
@@ -171,47 +188,52 @@ export default function Overview() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Users"
-          value={
-            dashboardStats.totalUsers.value?.toLocaleString?.() ||
-            dashboardStats.totalUsers.value
-          }
-          icon={Users}
-          trend={{
-            value: Math.abs(dashboardStats.totalUsers.change || 0),
-            isPositive: (dashboardStats.totalUsers.change || 0) >= 0,
-          }}
-        />
-        <StatCard
-          title="Active Users (Today)"
-          value={
-            dashboardStats.activeUsersToday.value?.toLocaleString?.() ||
-            dashboardStats.activeUsersToday.value
-          }
-          icon={UserCheck}
-          trend={{
-            value: Math.abs(dashboardStats.activeUsersToday.change || 0),
-            isPositive: (dashboardStats.activeUsersToday.change || 0) >= 0,
-          }}
-        />
-        <StatCard
-          title="Total Revenue"
-          value={`₹${(
-            (dashboardStats.totalRevenue.value || 0) / 100
-          ).toLocaleString()}`}
-          icon={MdCurrencyRupee}
-          trend={{
-            value: Math.abs(dashboardStats.totalRevenue.change || 0),
-            isPositive: (dashboardStats.totalRevenue.change || 0) >= 0,
-          }}
-        />
-        {/* <StatCard
-          title="OpenAI Balance"
-          value="₹12,450"
-          icon={Wallet}
-          trend={{ value: -15.3, isPositive: false }}
-        /> */}
+        {loadingStats ? (
+          <>
+            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-28" /><Skeleton className="h-8 w-24" /></CardContent></Card>
+            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-36" /><Skeleton className="h-8 w-28" /></CardContent></Card>
+            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-32" /><Skeleton className="h-8 w-32" /></CardContent></Card>
+            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-40" /><Skeleton className="h-8 w-28" /></CardContent></Card>
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Total Users"
+              value={
+                dashboardStats.totalUsers.value?.toLocaleString?.() ||
+                dashboardStats.totalUsers.value
+              }
+              icon={Users}
+              trend={{
+                value: Math.abs(dashboardStats.totalUsers.change || 0),
+                isPositive: (dashboardStats.totalUsers.change || 0) >= 0,
+              }}
+            />
+            <StatCard
+              title="Active Users (Today)"
+              value={
+                dashboardStats.activeUsersToday.value?.toLocaleString?.() ||
+                dashboardStats.activeUsersToday.value
+              }
+              icon={UserCheck}
+              trend={{
+                value: Math.abs(dashboardStats.activeUsersToday.change || 0),
+                isPositive: (dashboardStats.activeUsersToday.change || 0) >= 0,
+              }}
+            />
+            <StatCard
+              title="Total Revenue"
+              value={`₹${(
+                (dashboardStats.totalRevenue.value || 0) / 100
+              ).toLocaleString()}`}
+              icon={MdCurrencyRupee}
+              trend={{
+                value: Math.abs(dashboardStats.totalRevenue.change || 0),
+                isPositive: (dashboardStats.totalRevenue.change || 0) >= 0,
+              }}
+            />
+          </>
+        )}
       </div>
 
       {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -269,6 +291,9 @@ export default function Overview() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {loadingUserGrowth ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
             <ResponsiveContainer width="100%" height={300}>
               {/* <LineChart data={userGrowthData}> */}
               <LineChart data={userDataMonth}>
@@ -294,6 +319,7 @@ export default function Overview() {
                 />
               </LineChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -305,6 +331,9 @@ export default function Overview() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {loadingRevenue ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
             <ResponsiveContainer width="100%" height={300}>
               {/* <BarChart data={revenueData}> */}
               <BarChart data={revenueData}>
@@ -341,6 +370,7 @@ export default function Overview() {
                 />
               </BarChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -351,6 +381,11 @@ export default function Overview() {
             <CardTitle>Feature Usage Distribution</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-center">
+            {loadingFeature ? (
+              <div className="flex items-center justify-center w-full" style={{ height: 300 }}>
+                <Skeleton className="h-48 w-48 rounded-full" />
+              </div>
+            ) : (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -381,6 +416,7 @@ export default function Overview() {
                 />
               </PieChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -390,7 +426,17 @@ export default function Overview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.length > 0 ? (
+              {loadingActivity ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <div key={idx} className="flex items-start gap-3 rounded-lg border border-border p-3">
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-64" />
+                    </div>
+                    <Skeleton className="h-6 w-20" />
+                  </div>
+                ))
+              ) : recentActivity.length > 0 ? (
                 recentActivity.map((activity) => (
                   <div
                     key={activity.id}

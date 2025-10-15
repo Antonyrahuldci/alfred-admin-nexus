@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import apiFunctions from "@/api/apiFunctions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const creditsByUser = [
   { email: "john.doe@email.com", used: 8500, remaining: 1500, plan: "Pro" },
@@ -145,6 +146,7 @@ export default function CreditUsage() {
     total_users: null,
     timestamp: null,
   });
+  const [loading, setLoading] = useState(true);
   const fetchHeatmap = async () => {
     const res = await apiFunctions.getFeatureUsageHeatmap(7);
     if (res?.success && Array.isArray(res?.data)) {
@@ -215,12 +217,18 @@ export default function CreditUsage() {
     }
   };
   useEffect(() => {
-    fetchHeatmap();
-    fetchCreditsByUser();
-    fetchAverageCredits();
-    fetchAiModelUsage();
-    fetchModelDistribution();
-    fetchTotals();
+    const fetchAll = async () => {
+      await Promise.allSettled([
+        fetchHeatmap(),
+        fetchCreditsByUser(),
+        fetchAverageCredits(),
+        fetchAiModelUsage(),
+        fetchModelDistribution(),
+        fetchTotals(),
+      ]);
+      setLoading(false);
+    };
+    fetchAll();
   }, []);
   return (
     <div className="space-y-6">
@@ -242,11 +250,15 @@ export default function CreditUsage() {
                   Total Credits Used
                 </p>
                 <p className="text-3xl font-bold">
-                  {totals.total_credits_consumed !== null
-                    ? totals.total_credits_consumed.toLocaleString(undefined, {
-                        maximumFractionDigits: 2,
-                      })
-                    : "—"}
+                  {loading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    totals.total_credits_consumed !== null
+                      ? totals.total_credits_consumed.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })
+                      : "—"
+                  )}
                 </p>
               </div>
               <Coins className="h-8 w-8 text-primary" />
@@ -261,12 +273,16 @@ export default function CreditUsage() {
                   Avg Credits/User
                 </p>
                 <p className="text-3xl font-bold">
-                  {totals.average_credits_per_user !== null
-                    ? totals.average_credits_per_user.toLocaleString(
-                        undefined,
-                        { maximumFractionDigits: 2 }
-                      )
-                    : "—"}
+                  {loading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    totals.average_credits_per_user !== null
+                      ? totals.average_credits_per_user.toLocaleString(
+                          undefined,
+                          { maximumFractionDigits: 2 }
+                        )
+                      : "—"
+                  )}
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-primary" />
@@ -304,29 +320,42 @@ export default function CreditUsage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {aiModelUsageData.map((model, idx) => (
-                <div key={idx} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{model.model}</span>
-                    <div className="text-right">
-                      <p className="font-bold">
-                        {model.requests.toLocaleString()} requests
-                      </p>
-                      {model.tokens > 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          {(model.tokens / 1000000).toFixed(1)}M tokens
-                        </p>
-                      )}
+              {loading
+                ? Array.from({ length: 4 }).map((_, idx) => (
+                    <div key={idx} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-4 w-28" />
+                        <div className="text-right space-y-1">
+                          <Skeleton className="h-4 w-24 ml-auto" />
+                          <Skeleton className="h-3 w-20 ml-auto" />
+                        </div>
+                      </div>
+                      <Skeleton className="h-2 w-full" />
                     </div>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary transition-all"
-                      style={{ width: `${(model.requests / 68850) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                  ))
+                : aiModelUsageData.map((model, idx) => (
+                    <div key={idx} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{model.model}</span>
+                        <div className="text-right">
+                          <p className="font-bold">
+                            {model.requests.toLocaleString()} requests
+                          </p>
+                          {model.tokens > 0 && (
+                            <p className="text-sm text-muted-foreground">
+                              {(model.tokens / 1000000).toFixed(1)}M tokens
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${(model.requests / 68850) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
             </div>
           </CardContent>
         </Card>
@@ -336,31 +365,37 @@ export default function CreditUsage() {
             <CardTitle>Model Distribution</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={modelDistributionData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name} ${value}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {modelDistributionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="flex items-center justify-center w-full" style={{ height: 300 }}>
+                <Skeleton className="h-48 w-48 rounded-full" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={modelDistributionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name} ${value}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {modelDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -371,34 +406,50 @@ export default function CreditUsage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            
-            {creditsByUserData?.map((user, idx) => (
-              <div
-                key={idx}
-                className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border border-border"
-              >
-                <div className="flex-1">
-                  <p className="font-medium">{user?.email}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user?.plan} Plan
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-primary">{user?.used.toLocaleString()} used</p>
-                  <p className="text-sm text-muted-foreground">{user?.remaining.toLocaleString()} remaining</p>
-                </div>
-                <div className="w-full sm:w-24 h-2 bg-muted rounded-full overflow-hidden">
+            {loading
+              ? Array.from({ length: 5 }).map((_, idx) => (
                   <div
-                    className="h-full bg-primary transition-all"
-                    style={{
-                      width: `${
-                        (user?.used / (user?.used + user?.remaining)) * 100
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
+                    key={idx}
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border border-border"
+                  >
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                    <div className="text-right space-y-2">
+                      <Skeleton className="h-4 w-24 ml-auto" />
+                      <Skeleton className="h-3 w-28 ml-auto" />
+                    </div>
+                    <Skeleton className="w-full sm:w-24 h-2" />
+                  </div>
+                ))
+              : creditsByUserData?.map((user, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border border-border"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">{user?.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.plan} Plan
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-primary">{user?.used.toLocaleString()} used</p>
+                      <p className="text-sm text-muted-foreground">{user?.remaining.toLocaleString()} remaining</p>
+                    </div>
+                    <div className="w-full sm:w-24 h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary transition-all"
+                        style={{
+                          width: `${
+                            (user?.used / (user?.used + user?.remaining)) * 100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
           </div>
         </CardContent>
       </Card>
@@ -409,29 +460,33 @@ export default function CreditUsage() {
             <CardTitle>Average Credits per Active User</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={avgCredits}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="credits"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={avgCredits}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
+                  <YAxis stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="credits"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -487,51 +542,65 @@ export default function CreditUsage() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3 font-medium">Feature</th>
-                  <th className="text-center p-3 font-medium">Mon</th>
-                  <th className="text-center p-3 font-medium">Tue</th>
-                  <th className="text-center p-3 font-medium">Wed</th>
-                  <th className="text-center p-3 font-medium">Thu</th>
-                  <th className="text-center p-3 font-medium">Fri</th>
-                  <th className="text-center p-3 font-medium">Sat</th>
-                  <th className="text-center p-3 font-medium">Sun</th>
-                </tr>
-              </thead>
-              <tbody>
-                {heatmapData.map((row, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="p-3 font-medium">{row.feature}</td>
-                    {["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map(
-                      (day) => {
-                        const value = row[day];
-                        const intensity = Math.min(100, (value / 600) * 100);
-                        return (
-                          <td key={day} className="p-3 text-center">
-                            <span
-                              className="inline-block px-3 py-1 rounded"
-                              style={{
-                                backgroundColor: `hsl(217 91% ${
-                                  100 - intensity / 2
-                                }%)`,
-                                color:
-                                  intensity > 50
-                                    ? "white"
-                                    : "hsl(var(--foreground))",
-                              }}
-                            >
-                              {value}
-                            </span>
-                          </td>
-                        );
-                      }
-                    )}
-                  </tr>
+            {loading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-6 w-1/3" />
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="flex gap-3 items-center">
+                    <Skeleton className="h-6 w-40" />
+                    {Array.from({ length: 7 }).map((__, i) => (
+                      <Skeleton key={i} className="h-6 w-12" />
+                    ))}
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 font-medium">Feature</th>
+                    <th className="text-center p-3 font-medium">Mon</th>
+                    <th className="text-center p-3 font-medium">Tue</th>
+                    <th className="text-center p-3 font-medium">Wed</th>
+                    <th className="text-center p-3 font-medium">Thu</th>
+                    <th className="text-center p-3 font-medium">Fri</th>
+                    <th className="text-center p-3 font-medium">Sat</th>
+                    <th className="text-center p-3 font-medium">Sun</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {heatmapData.map((row, idx) => (
+                    <tr key={idx} className="border-b">
+                      <td className="p-3 font-medium">{row.feature}</td>
+                      {["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map(
+                        (day) => {
+                          const value = row[day];
+                          const intensity = Math.min(100, (value / 600) * 100);
+                          return (
+                            <td key={day} className="p-3 text-center">
+                              <span
+                                className="inline-block px-3 py-1 rounded"
+                                style={{
+                                  backgroundColor: `hsl(217 91% ${
+                                    100 - intensity / 2
+                                  }%)`,
+                                  color:
+                                    intensity > 50
+                                      ? "white"
+                                      : "hsl(var(--foreground))",
+                                }}
+                              >
+                                {value}
+                              </span>
+                            </td>
+                          );
+                        }
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </CardContent>
       </Card>

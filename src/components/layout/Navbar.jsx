@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useEffect, useState } from "react";
 export const Navbar = () => {
   const location = useLocation();
 
@@ -50,6 +51,11 @@ export const Navbar = () => {
       }
     });
   };
+  const [email, setEmail] = useState("")
+
+  useEffect(() => {
+    setEmail(localStorage.getItem("email"))
+  }, [])
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
       <div className="flex flex-1 items-center gap-4">
@@ -75,7 +81,7 @@ export const Navbar = () => {
               <div className="text-left text-sm">
                 <div className="font-medium">Admin User</div>
                 <div className="text-xs text-muted-foreground">
-                  admin@simbli.com
+                 {email}
                 </div>
               </div>
             </button>

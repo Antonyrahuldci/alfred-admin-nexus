@@ -40,6 +40,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import apiFunctions from "../api/apiFunctions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // const mockUsers = [
 //   {
@@ -739,10 +740,41 @@ export default function Users() {
 
       <Card>
         <CardContent className="p-0">
-          {loading ? (
-            <div className="flex justify-center items-center p-8">
-              <div className="text-muted-foreground">Loading users...</div>
-            </div>
+        {loading ? (
+            <Table>
+              <TableHeader className="Tabel_Head">
+                <TableRow>
+                  <TableHead>S.No</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead>Last Active</TableHead>
+                  <TableHead className="text-right">Words</TableHead>
+                  <TableHead className="text-right">Images</TableHead>
+                  <TableHead className="text-right">SERP</TableHead>
+                  <TableHead>View More</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 10 }).map((_, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium"><Skeleton className="h-4 w-10" /></TableCell>
+                    <TableCell className="font-medium"><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-64" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 rounded-full" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           ) : (
             <Table>
               <TableHeader className="Tabel_Head">
@@ -909,7 +941,7 @@ export default function Users() {
                                       Images Used
                                     </p>
                                     <p className="text-lg font-semibold">
-                                      {userDetailsData.usageStats.imagesUsed}
+                          {userDetailsData.usageStats.imagesUsed}
                                     </p>
                                   </div>
                                   <div className="space-y-1">

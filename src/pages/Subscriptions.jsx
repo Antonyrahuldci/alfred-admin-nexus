@@ -17,6 +17,7 @@ import CouponModal from "./CouponModal";
 import { useEffect, useState } from "react";
 import apiFunctions from "@/api/apiFunctions";
 import Pagination from "@/components/Pagination/Pagination.jsx";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // const plans = [
 //   { name: "Free", price: "$0", subscribers: 2134, revenue: 0 },
@@ -81,6 +82,9 @@ export default function Subscriptions() {
   const [paymentHistory, setPaymentHistory] = useState([])
   const [coupons, setCoupons] = useState([])
   const [couponPagination, setCouponPagination] = useState({ totalPages: 0, totalRecords: 0 })
+  const [loadingPlans, setLoadingPlans] = useState(true)
+  const [loadingPayments, setLoadingPayments] = useState(true)
+  const [loadingCoupons, setLoadingCoupons] = useState(true)
 
   const getPlanColorClass = (plan) => {
     switch (plan) {
@@ -120,21 +124,27 @@ export default function Subscriptions() {
   };
 
   const getUserPlansDataApi = async () => {
-    const response = await apiFunctions.getUserPlansData();
-    console.log(response.data.data);
-    if (response.data.status === 200) {
-      // Convert paisa to rupees (divide by 100)
-      const convertedPlans = response.data.data.map((plan) => ({
-        ...plan,
-        revenue: Math.round(plan.revenue / 100), // Convert paisa to rupees
-        price: `₹${Math.round(parseInt(plan.price.replace("$", "")) / 100)}`, // Convert price from paisa to rupees and change symbol
-      }));
-      setPlans(convertedPlans);
+    try {
+      setLoadingPlans(true)
+      const response = await apiFunctions.getUserPlansData();
+      console.log(response.data.data);
+      if (response.data.status === 200) {
+        // Convert paisa to rupees (divide by 100)
+        const convertedPlans = response.data.data.map((plan) => ({
+          ...plan,
+          revenue: Math.round(plan.revenue / 100),
+          price: `₹${Math.round(parseInt(plan.price.replace("$", "")) / 100)}`,
+        }));
+        setPlans(convertedPlans);
+      }
+    } finally {
+      setLoadingPlans(false)
     }
   };
 
   const getPaymentHistoryDataApi = async (page = 1, limit = 10) => {
     try {
+      setLoadingPayments(true)
       const response = await apiFunctions.getPaymentHistory(page, limit)
       if (response.data.status === 200) {
 
@@ -144,11 +154,14 @@ export default function Subscriptions() {
       }
     } catch (err) {
       console.log(err)
+    } finally {
+      setLoadingPayments(false)
     }
   }
 
   const getCouponsApi = async (page = 1, limit = 10) => {
     try {
+      setLoadingCoupons(true)
       const response = await apiFunctions.getCoupons(page, limit)
       if (response.data.status === 200) {
         setCoupons(response.data.data.coupons || [])
@@ -159,6 +172,8 @@ export default function Subscriptions() {
       }
     } catch (err) {
       console.log(err)
+    } finally {
+      setLoadingCoupons(false)
     }
   }
 
@@ -193,38 +208,61 @@ export default function Subscriptions() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {plans.map((plan) => (
-          <Card key={plan.name} className="overflow-hidden bg-gradient-card">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>{plan.name}</span>
-                <Badge variant={plan.name === "Free" ? "secondary" : "default"}>
-                  {plan.price}/mo
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-2xl font-bold">
-                  {plan.subscribers.toLocaleString()}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  subscribers
-                </span>
-              </div>
-              {plan.revenue > 0 && (
-                <div className="flex items-center gap-2">
-                  <MdCurrencyRupee className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-2xl font-bold">
-                    {plan.revenue.toLocaleString()}
-                  </span>
-                  <span className="text-sm text-muted-foreground">MRR</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+        {loadingPlans
+          ? Array.from({ length: 3 }).map((_, idx) => (
+              <Card key={idx} className="overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-6 w-16" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-6 w-24" />
+                    <Skeleton className="h-4 w-10" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          : plans.map((plan) => (
+              <Card key={plan.name} className="overflow-hidden bg-gradient-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{plan.name}</span>
+                    <Badge variant={plan.name === "Free" ? "secondary" : "default"}>
+                      {plan.price}/mo
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-2xl font-bold">
+                      {plan.subscribers.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      subscribers
+                    </span>
+                  </div>
+                  {plan.revenue > 0 && (
+                    <div className="flex items-center gap-2">
+                      <MdCurrencyRupee className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-2xl font-bold">
+                        {plan.revenue.toLocaleString()}
+                      </span>
+                      <span className="text-sm text-muted-foreground">MRR</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -236,36 +274,42 @@ export default function Subscriptions() {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={revenueByPlan}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) =>
-                    `${name}: ₹${value.toLocaleString()}`
-                  }
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {revenueByPlan.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {loadingPlans ? (
+              <div className="flex items-center justify-center w-full" style={{ height: 300 }}>
+                <Skeleton className="h-48 w-48 rounded-full" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={revenueByPlan}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) =>
+                      `${name}: ₹${value.toLocaleString()}`
+                    }
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {revenueByPlan.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -275,7 +319,17 @@ export default function Subscriptions() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
-              {coupons.length === 0 ? (
+              {loadingCoupons ? (
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <div key={idx} className="flex items-center justify-between rounded-lg border border-border p-3">
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                ))
+              ) : coupons.length === 0 ? (
                 <div className="text-sm text-muted-foreground">No coupons found.</div>
               ) : (
                 coupons.map((c) => (
@@ -318,23 +372,33 @@ export default function Subscriptions() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paymentHistory.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-medium">{payment.user}</TableCell>
-                  <TableCell>
-                    <Badge className={`TabelCell ${getPlanColorClass(payment.plan)}`}>
-                      {payment.plan}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-mono">{payment.amount}</TableCell>
-                  <TableCell>{payment.date}</TableCell>
-                  <TableCell>
-                    <Badge className={`TabelCell ${getStatusColorClass(payment.status)}`}>
-                      {payment.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {loadingPayments
+                ? Array.from({ length: 6 }).map((_, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="font-medium"><Skeleton className="h-4 w-40" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                      <TableCell className="font-mono"><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                    </TableRow>
+                  ))
+                : paymentHistory.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell className="font-medium">{payment.user}</TableCell>
+                      <TableCell>
+                        <Badge className={`TabelCell ${getPlanColorClass(payment.plan)}`}>
+                          {payment.plan}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono">{payment.amount}</TableCell>
+                      <TableCell>{payment.date}</TableCell>
+                      <TableCell>
+                        <Badge className={`TabelCell ${getStatusColorClass(payment.status)}`}>
+                          {payment.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </CardContent>
