@@ -10,6 +10,7 @@ import Users from "./pages/Users";
 import UserAnalytics from "./pages/UserAnalytics";
 import Subscriptions from "./pages/Subscriptions";
 import CreditUsage from "./pages/CreditUsage";
+import Logs from "./pages/Logs";
 import Communications from "./pages/Communications";
 import SystemHealth from "./pages/SystemHealth";
 import SecurityCompliance from "./pages/SecurityCompliance";
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/user-analytics" element={<UserAnalytics />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/credit-usage" element={<CreditUsage />} />
+              <Route path="/logs" element={<Logs />} />
               <Route path="/communications" element={<Communications />} />
               <Route path="/system-health" element={<SystemHealth />} />
               <Route path="/security" element={<SecurityCompliance />} />

@@ -322,7 +322,7 @@ export default function CreditUsage() {
             <div className="space-y-4">
               {loading
                 ? Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={idx} className="space-y-2">
+                    <div key={idx} className="space-y-3">
                       <div className="flex items-center justify-between">
                         <Skeleton className="h-4 w-28" />
                         <div className="text-right space-y-1">
@@ -334,7 +334,7 @@ export default function CreditUsage() {
                     </div>
                   ))
                 : aiModelUsageData.map((model, idx) => (
-                    <div key={idx} className="space-y-2">
+                    <div key={idx} className="space-y-6">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{model.model}</span>
                         <div className="text-right">
@@ -364,37 +364,60 @@ export default function CreditUsage() {
           <CardHeader>
             <CardTitle>Model Distribution</CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center">
+          <CardContent>
             {loading ? (
               <div className="flex items-center justify-center w-full" style={{ height: 300 }}>
                 <Skeleton className="h-48 w-48 rounded-full" />
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={modelDistributionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name} ${value}%`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {modelDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="space-y-4">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={modelDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {modelDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "0.5rem",
+                      }}
+                      formatter={(value, name) => [
+                        `${value}%`,
+                        name
+                      ]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                
+                {/* Legend */}
+                <div className="grid grid-cols-2 gap-3">
+                  {modelDistributionData.map((model, index) => (
+                    <div key={model.name} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div 
+                        className="w-3 h-3 rounded-full flex-shrink-0" 
+                        style={{ 
+                          backgroundColor: model.color
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{model.name}</p>
+                        <p className="font-semibold text-xs text-muted-foreground">{model.value}%</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>

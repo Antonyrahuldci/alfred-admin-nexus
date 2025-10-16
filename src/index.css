@@ -260,7 +260,7 @@ header {
   }
 }
 .Recent_Activity {
-  max-height: 520px;
+  max-height: 450px;
   overflow-y: auto;
 }
 /* ::selection{

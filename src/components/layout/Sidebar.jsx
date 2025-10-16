@@ -14,11 +14,13 @@ import {
   Shield,
   Sparkles,
   UserCog,
+  FileSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
-const navItems = [
+const baseNavItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/overview" },
   { icon: Users, label: "Users", path: "/users" },
   { icon: TrendingUp, label: "User Analytics", path: "/user-analytics" },
@@ -33,7 +35,23 @@ const navItems = [
   // { icon: FileText, label: "Reports", path: "/reports" },
 ];
 
+const developerNavItems = [
+  { icon: FileSearch, label: "Logs", path: "/logs" },
+];
+
 export const Sidebar = ({ isOpen, onToggle }) => {
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+  }, []);
+
+  // Combine base nav items with developer-specific items if role is developer
+  const navItems = userRole === "developer" 
+    ? [...baseNavItems, ...developerNavItems]
+    : baseNavItems;
+
   return (
     <aside
       className={cn(

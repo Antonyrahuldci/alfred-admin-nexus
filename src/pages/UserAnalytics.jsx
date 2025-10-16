@@ -137,11 +137,13 @@ export default function UserAnalytics() {
           ? response.data.data
           : [];
 
-      const mapped = users.map((u) => ({
-        name: u.email,
-        plan: u.plan_type,
-        credits: Number(u.total_tokens || 0),
-      }));
+      const mapped = users
+        .map((u) => ({
+          name: u.email,
+          plan: u.plan_type,
+          credits: Number(u.total_tokens || 0),
+        }))
+        .sort((a, b) => b.credits - a.credits); // Sort by credits from high to low
       setTopActiveUsers(mapped);
     } catch (err) {
       console.log(err);
@@ -243,35 +245,58 @@ export default function UserAnalytics() {
               Users by Country
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={topCountriesData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ country, percent }) => `${country} ${percent}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="users"
-                >
-                  {topCountriesData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+          <CardContent>
+            <div className="space-y-4">
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={topCountriesData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="users"
+                  >
+                    {topCountriesData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                    formatter={(value, name) => [
+                      `${value} users`,
+                      name
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              
+              {/* Legend */}
+              <div className="grid grid-cols-2 gap-3">
+                {topCountriesData.map((country, index) => (
+                  <div key={country.country} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div 
+                      className="w-3 h-3 rounded-full flex-shrink-0" 
+                      style={{ 
+                        backgroundColor: COLORS[index % COLORS.length]
+                      }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{country.country}</p>
+                      <p className="font-semibold text-xs text-muted-foreground">{country.users.toLocaleString()} users</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

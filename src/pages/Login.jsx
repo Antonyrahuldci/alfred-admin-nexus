@@ -96,20 +96,17 @@ export default function Login() {
             className="mx-auto mb-4 mt-3 Main_logo"
             style={{ width: "140px", objectFit: "contain" }}
           />
-          <h2 className="text-3xl font-bold Welcome_Back">Welcome Back <span className="Welcome_Admin">(Admin)</span> </h2>
-          <p className="mt-0 text-sm Sign_In">
-            Please sign in to continue
-          </p>
+          <h2 className="text-3xl font-bold Welcome_Back">
+            Welcome Back <span className="Welcome_Admin">(Admin)</span>{" "}
+          </h2>
+          <p className="mt-0 text-sm Sign_In">Please sign in to continue</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium Labels"
-            >
+            <label htmlFor="email" className="block text-sm font-medium Labels">
               Email address
             </label>
             <div className="mt-2 relative input-wrappers">
@@ -161,9 +158,9 @@ export default function Login() {
                 className="absolute inset-y-0 right-0 pr-3 flex items-center  lock-icons"
               >
                 {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" />
-                ) : (
                   <EyeIcon className="h-5 w-5" />
+                ) : (
+                  <EyeSlashIcon className="h-5 w-5" />
                 )}
               </button>
             </div>

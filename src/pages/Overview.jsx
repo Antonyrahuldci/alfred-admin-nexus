@@ -5,7 +5,7 @@ import {
   Percent,
   TrendingDown,
   Wallet,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
 import { MdCurrencyRupee } from "react-icons/md";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -96,13 +96,15 @@ export default function Overview() {
         ? response.data
         : response.data?.data;
       if (Array.isArray(raw)) {
-        const normalized = raw.map((item) => ({
-          name: item.name,
-          value:
-            typeof item.value === "string"
-              ? parseFloat(item.value)
-              : Number(item.value),
-        }));
+        const normalized = raw
+          .map((item) => ({
+            name: item.name,
+            value:
+              typeof item.value === "string"
+                ? parseFloat(item.value)
+                : Number(item.value),
+          }))
+          .filter((item) => item.value > 0); // Filter out zero values
         setFeatureUsageData(normalized);
       }
     } catch (err) {
@@ -190,10 +192,30 @@ export default function Overview() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {loadingStats ? (
           <>
-            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-28" /><Skeleton className="h-8 w-24" /></CardContent></Card>
-            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-36" /><Skeleton className="h-8 w-28" /></CardContent></Card>
-            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-32" /><Skeleton className="h-8 w-32" /></CardContent></Card>
-            <Card><CardContent className="p-6 space-y-3"><Skeleton className="h-4 w-40" /><Skeleton className="h-8 w-28" /></CardContent></Card>
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-8 w-24" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-8 w-28" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-8 w-32" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-8 w-28" />
+              </CardContent>
+            </Card>
           </>
         ) : (
           <>
@@ -294,31 +316,34 @@ export default function Overview() {
             {loadingUserGrowth ? (
               <Skeleton className="h-[300px] w-full" />
             ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              {/* <LineChart data={userGrowthData}> */}
-              <LineChart data={userDataMonth}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="users"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={{ fill: "hsl(var(--primary))" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height={300}>
+                {/* <LineChart data={userGrowthData}> */}
+                <LineChart data={userDataMonth}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="users"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    dot={{ fill: "hsl(var(--primary))" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
@@ -334,101 +359,132 @@ export default function Overview() {
             {loadingRevenue ? (
               <Skeleton className="h-[300px] w-full" />
             ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              {/* <BarChart data={revenueData}> */}
-              <BarChart data={revenueData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                <YAxis
-                  stroke="hsl(var(--muted-foreground))"
-                  tickFormatter={(value) => {
-                    const inrValue = value / 100;
-                    if (inrValue >= 1000) {
-                      return `₹${(inrValue / 1000).toFixed(1)}k`;
-                    }
-                    return `₹${inrValue}`;
-                  }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                  }}
-                  formatter={(value) => [
-                    `₹${(value / 100).toLocaleString()}`,
-                    "Revenue",
-                  ]}
-                />
-                <Bar
-                  dataKey="revenue"
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height={300}>
+                {/* <BarChart data={revenueData}> */}
+                <BarChart data={revenueData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    tickFormatter={(value) => {
+                      const inrValue = value / 100;
+                      if (inrValue >= 1000) {
+                        return `₹${(inrValue / 1000).toFixed(1)}k`;
+                      }
+                      return `₹${inrValue}`;
+                    }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                    formatter={(value) => [
+                      `₹${(value / 100).toLocaleString()}`,
+                      "Revenue",
+                    ]}
+                  />
+                  <Bar
+                    dataKey="revenue"
+                    fill="hsl(var(--primary))"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Feature Usage Distribution</CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center">
+          <CardContent>
             {loadingFeature ? (
-              <div className="flex items-center justify-center w-full" style={{ height: 300 }}>
+              <div
+                className="flex items-center justify-center w-full"
+                style={{ height: 300 }}
+              >
                 <Skeleton className="h-48 w-48 rounded-full" />
               </div>
             ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={featureUsageData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {featureUsageData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+              <div className="space-y-4">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={featureUsageData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {featureUsageData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                          stroke="none"
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "0.5rem",
+                      }}
+                      formatter={(value, name) => [
+                        `${value}%`,
+                        name
+                      ]}
                     />
+                  </PieChart>
+                </ResponsiveContainer>
+                
+                {/* Legend */}
+                <div className="grid grid-cols-2 gap-3">
+                  {featureUsageData.map((feature, index) => (
+                    <div key={feature.name} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div 
+                        className="w-3 h-3 rounded-full flex-shrink-0" 
+                        style={{ 
+                          backgroundColor: COLORS[index % COLORS.length]
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{feature.name}</p>
+                        <p className="font-semibold text-xs text-muted-foreground">{feature.value}%</p>
+                      </div>
+                    </div>
                   ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 Recent_Activity">
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="h-[420px] flex flex-col">
+            <div className="flex-1 overflow-y-auto space-y-4">
               {loadingActivity ? (
                 Array.from({ length: 5 }).map((_, idx) => (
-                  <div key={idx} className="flex items-start gap-3 rounded-lg border border-border p-3">
+                  <div
+                    key={idx}
+                    className="flex items-start gap-3 rounded-lg border border-border p-3"
+                  >
                     <div className="flex-1 space-y-1">
                       <Skeleton className="h-4 w-40" />
                       <Skeleton className="h-3 w-64" />
@@ -477,7 +533,8 @@ export default function Overview() {
                           ? "Plan Change"
                           : activity.type === "autopay_change"
                           ? "Autopay"
-                          : activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                          : activity.type.charAt(0).toUpperCase() +
+                            activity.type.slice(1)}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
                         {activity.time}

@@ -843,13 +843,13 @@ export default function Users() {
                     <TableCell className="text-muted-foreground TabelCell">
                       {user.lastActive}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right ">
                       {user.wordCount.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right ">
                       {user.images}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right ">
                       {user.serpUsage}
                     </TableCell>
                     <TableCell>

@@ -34,7 +34,8 @@ export const Navbar = () => {
       buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem("access-token");
+        // localStorage.removeItem("access-token");
+        localStorage.clear();
 
         Swal.fire({
           icon: "success",
@@ -51,11 +52,11 @@ export const Navbar = () => {
       }
     });
   };
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
-    setEmail(localStorage.getItem("email"))
-  }, [])
+    setEmail(localStorage.getItem("email"));
+  }, []);
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
       <div className="flex flex-1 items-center gap-4">
@@ -80,9 +81,7 @@ export const Navbar = () => {
               </Avatar>
               <div className="text-left text-sm">
                 <div className="font-medium">Admin User</div>
-                <div className="text-xs text-muted-foreground">
-                 {email}
-                </div>
+                <div className="text-xs text-muted-foreground">{email}</div>
               </div>
             </button>
           </DropdownMenuTrigger>
