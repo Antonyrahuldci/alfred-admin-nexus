@@ -368,8 +368,12 @@ export default function Users() {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [activityFilter, setActivityFilter] = useState("all");
   const [sortBy, setSortBy] = useState("words-desc");
+  // Optional range (future UI hook). Keep nulls so backend interprets correctly.
+  const [startDate] = useState(null);
+  const [endDate] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [mockUsers, setMockUser] = useState([]);
@@ -381,10 +385,11 @@ export default function Users() {
   const [availablePlans, setAvailablePlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
 
-  const mockUserApi = async (page = 1, limit = 10) => {
+  const mockUserApi = async (page = 1, limit = 10, search = '', planId = null, sortOpt = 'words-desc', activity = 'all') => {
     try {
       setLoading(true);
-      const response = await apiFunctions.getMockUser(page, limit);
+      const activityStatus = activity === 'all' ? null : activity;
+      const response = await apiFunctions.getMockUser(page, limit, search, planId, sortOpt, activityStatus, startDate, endDate);
       if (response.data.status === 200) {
         setMockUser(response.data.data.users);
         setTotalPages(response.data.data.pagination.totalPages);
@@ -433,12 +438,12 @@ export default function Users() {
   };
 
   useEffect(() => {
-    mockUserApi(currentPage, itemsPerPage);
-  }, [currentPage]);
+    mockUserApi(currentPage, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter);
+  }, [currentPage, searchQuery, selectedPlanId, sortBy, activityFilter]);
 
   // Initial load
   useEffect(() => {
-    mockUserApi(1, itemsPerPage);
+    mockUserApi(1, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter);
     fetchAllPlans();
   }, []);
 
@@ -669,7 +674,13 @@ export default function Users() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Select value={planFilter} onValueChange={setPlanFilter}>
+            <Select value={planFilter} onValueChange={(val)=>{
+              setPlanFilter(val);
+              if(val === 'all'){ setSelectedPlanId(null); return; }
+              const match = availablePlans.find(p=>p.name.toLowerCase()===val.toLowerCase());
+              setSelectedPlanId(match ? match.id : null);
+              setCurrentPage(1);
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="Plan Type" />
               </SelectTrigger>
@@ -688,7 +699,7 @@ export default function Users() {
                 )}
               </SelectContent>
             </Select>
-            <Select value={activityFilter} onValueChange={setActivityFilter}>
+            <Select value={activityFilter} onValueChange={(v)=>{ setActivityFilter(v); setCurrentPage(1); }}>
               <SelectTrigger>
                 <SelectValue placeholder="Activity Status" />
               </SelectTrigger>
@@ -698,7 +709,7 @@ export default function Users() {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select value={sortBy} onValueChange={(v)=>{ setSortBy(v); setCurrentPage(1); }}>
               <SelectTrigger>
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
@@ -748,7 +759,8 @@ export default function Users() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Plan</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Plan Status</TableHead>
+                  <TableHead>Autopay Status</TableHead>
                   <TableHead>Join Date</TableHead>
                   <TableHead>Last Active</TableHead>
                   <TableHead className="text-right">Words</TableHead>
@@ -800,7 +812,9 @@ export default function Users() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Plan</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Plan Status</TableHead>
+                  <TableHead>Autopay Status</TableHead>
+
                   <TableHead>Join Date</TableHead>
                   <TableHead>Last Active</TableHead>
                   <TableHead className="text-right">Words</TableHead>
@@ -837,6 +851,15 @@ export default function Users() {
                         )}`}
                       >
                         {user.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`TabelCell ${getStatusColorClass(
+                          user.autoPay_canceled
+                        )}`}
+                      >
+                        {user?.autoPay_canceled ? "Disabled" : "Enabled"}
                       </Badge>
                     </TableCell>
                     <TableCell className="TabelCell">{user.joinDate}</TableCell>

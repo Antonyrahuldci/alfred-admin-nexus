@@ -59,7 +59,18 @@ const apiFunctions = {
   getUsersGrowthMonthly: () => method.get(`${appConstants?.newAdminBaseUrl}/monthly-user-growth`),
   getMonthlyRevenue: () => method.get(`${appConstants?.newAdminBaseUrl}/monthly-revenue`),
   getRecentActivity: (limit) => method.get(`${appConstants?.newAdminBaseUrl}/recent-activity?limit=${limit || 10}`),
-  getMockUser: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/users-with-usage?page=${page || 1}&limit=${limit || 10}`),
+  getMockUser: (page, limit, search, planId, sortBy, activityStatus, startDate, endDate) => {
+    const params = new URLSearchParams();
+    params.append('page', page || 1);
+    params.append('limit', limit || 10);
+    if (search) params.append('search', search);
+    if (planId) params.append('planId', planId);
+    if (sortBy) params.append('sortBy', sortBy);
+    if (activityStatus) params.append('activityStatus', activityStatus);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    return method.get(`${appConstants?.newAdminBaseUrl}/users-with-usage?${params.toString()}`);
+  },
   getUserPlansData: () => method.get(`${appConstants?.newAdminBaseUrl}/subscription-plans-with-revenue`),
   getPaymentHistory: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/payment-history?page=${page || 1}&limit=${limit || 10}`),
   getCoupons: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/coupons?page=${page || 1}&limit=${limit || 10}`),
