@@ -462,13 +462,6 @@ export default function Users() {
     );
   };
 
-  const isUserActive = (lastActive) => {
-    const activePatterns = ["minute", "hour", "minutes ago", "hours ago"];
-    return activePatterns.some((pattern) =>
-      lastActive.toLowerCase().includes(pattern)
-    );
-  };
-
   console.log("planFilter", planFilter);
   console.log("mockUsers", mockUsers); // Client-side filtering (since API doesn't support filtering yet)
   const filteredAndSortedUsers = mockUsers
@@ -483,11 +476,11 @@ export default function Users() {
         planFilter === "all" ||
         (userPlan && userPlan.toLowerCase() === planFilter.toLowerCase());
 
-      const matchesActivity =
+      const matchesStatus =
         activityFilter === "all" ||
-        (activityFilter === "active" && isUserActive(user.lastActive)) ||
-        (activityFilter === "inactive" && !isUserActive(user.lastActive));
-      return matchesSearch && matchesPlan && matchesActivity;
+        (activityFilter === "N/A" && (!user.status || user.status === "N/A" || user.status === "")) ||
+        (user.status && user.status === activityFilter);
+      return matchesSearch && matchesPlan && matchesStatus;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -665,65 +658,80 @@ export default function Users() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search users..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Search Users</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search users..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
-            <Select value={planFilter} onValueChange={(val)=>{
-              setPlanFilter(val);
-              if(val === 'all'){ setSelectedPlanId(null); return; }
-              const match = availablePlans.find(p=>p.name.toLowerCase()===val.toLowerCase());
-              setSelectedPlanId(match ? match.id : null);
-              setCurrentPage(1);
-            }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Plan Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Plans</SelectItem>
-                {plansLoading ? (
-                  <SelectItem value="loading" disabled>
-                    Loading plans...
-                  </SelectItem>
-                ) : (
-                  availablePlans.map((plan) => (
-                    <SelectItem key={plan.id} value={plan.name.toLowerCase()}>
-                      {plan.name}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Plan Type</label>
+              <Select value={planFilter} onValueChange={(val)=>{
+                setPlanFilter(val);
+                if(val === 'all'){ setSelectedPlanId(null); return; }
+                const match = availablePlans.find(p=>p.name.toLowerCase()===val.toLowerCase());
+                setSelectedPlanId(match ? match.id : null);
+                setCurrentPage(1);
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Plan Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Plans</SelectItem>
+                  {plansLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Loading plans...
                     </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            <Select value={activityFilter} onValueChange={(v)=>{ setActivityFilter(v); setCurrentPage(1); }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Activity Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Users</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={(v)=>{ setSortBy(v); setCurrentPage(1); }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sort By" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="words-desc">Words (High to Low)</SelectItem>
-                <SelectItem value="words-asc">Words (Low to High)</SelectItem>
-                <SelectItem value="images-desc">
-                  Images (High to Low)
-                </SelectItem>
-                <SelectItem value="images-asc">Images (Low to High)</SelectItem>
-                <SelectItem value="serp-desc">SERP (High to Low)</SelectItem>
-                <SelectItem value="serp-asc">SERP (Low to High)</SelectItem>
-              </SelectContent>
-            </Select>
+                  ) : (
+                    availablePlans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.name.toLowerCase()}>
+                        {plan.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Plan Status</label>
+              <Select value={activityFilter} onValueChange={(v)=>{ setActivityFilter(v); setCurrentPage(1); }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Plan Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Trial">Trial</SelectItem>
+                  <SelectItem value="Free Trial Cancelled">Free Trial Cancelled</SelectItem>
+                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  <SelectItem value="N/A">N/A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Sort By</label>
+              <Select value={sortBy} onValueChange={(v)=>{ setSortBy(v); setCurrentPage(1); }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="words-desc">Words (High to Low)</SelectItem>
+                  <SelectItem value="words-asc">Words (Low to High)</SelectItem>
+                  <SelectItem value="images-desc">
+                    Images (High to Low)
+                  </SelectItem>
+                  <SelectItem value="images-asc">Images (Low to High)</SelectItem>
+                  <SelectItem value="serp-desc">SERP (High to Low)</SelectItem>
+                  <SelectItem value="serp-asc">SERP (Low to High)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -178,7 +178,7 @@ export default function Subscriptions() {
     } finally {
       setLoadingPayments(false);
     }
-  },[]);
+  }, []);
 
   const getCouponsApi = useCallback(async (page = 1, limit = 10) => {
     try {
@@ -196,7 +196,7 @@ export default function Subscriptions() {
     } finally {
       setLoadingCoupons(false);
     }
-  },[]);
+  }, []);
 
   const fetchExchangeRate = useCallback(async () => {
     try {
@@ -211,12 +211,12 @@ export default function Subscriptions() {
       console.error("Failed to fetch exchange rate:", error);
       // Don't set any fallback rate, let the component handle it
     }
-  },[]);
+  }, []);
 
   const handleCouponCreated = useCallback(() => {
-  
-  getCouponsApi(1, 10);
-}, [getCouponsApi]);
+
+    getCouponsApi(1, 10);
+  }, [getCouponsApi]);
 
   useEffect(() => {
     fetchExchangeRate(); // Fetch current exchange rate
@@ -235,8 +235,25 @@ export default function Subscriptions() {
     getPaymentHistoryDataApi(currentPage, itemsPerPage);
   }, [currentPage]);
 
+  // Sort plans: Monthly plans first (Basic, Standard, Pro), then Yearly plans (Basic, Standard, Pro)
+  const sortedPlans = [...plans].sort((a, b) => {
+    const aIsMonthly = a.name.includes('Monthly');
+    const bIsMonthly = b.name.includes('Monthly');
+
+    // If one is monthly and other is yearly, monthly comes first
+    if (aIsMonthly && !bIsMonthly) return -1;
+    if (!aIsMonthly && bIsMonthly) return 1;
+
+    // If both are same type (both monthly or both yearly), sort by plan tier
+    const planOrder = ['Basic', 'Standard', 'Pro'];
+    const aPlanTier = planOrder.findIndex(tier => a.name.includes(tier));
+    const bPlanTier = planOrder.findIndex(tier => b.name.includes(tier));
+
+    return aPlanTier - bPlanTier;
+  });
+
   // Filter plans with revenue > 0 for the pie chart
-  const revenueByPlan = plans
+  const revenueByPlan = sortedPlans
     .filter((plan) => plan.revenue > 0)
     .map((plan) => ({
       name: plan.name,
@@ -288,71 +305,71 @@ export default function Subscriptions() {
       <div className="grid gap-4 md:grid-cols-3">
         {loadingPlans
           ? Array.from({ length: 3 }).map((_, idx) => (
-              <Card key={idx} className="overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <Skeleton className="h-5 w-40" />
-                    <Skeleton className="h-6 w-16" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4" />
-                    <Skeleton className="h-6 w-20" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4" />
-                    <Skeleton className="h-6 w-24" />
-                    <Skeleton className="h-4 w-10" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          : plans.map((plan) => (
-              <Card
-                key={plan.name}
-                className="overflow-hidden bg-gradient-card"
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="break-words">
-                      {plan.name.split(" - ").map((part, index) => (
-                        <span key={index}>
-                          {index > 0 && <br />}
-                          {part}
-                        </span>
-                      ))}
-                    </span>
-                    <Badge
-                      variant={plan.name === "Free" ? "secondary" : "default"}
-                    >
-                      {plan.price}/mo
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-2xl font-bold">
-                      {plan.subscribers.toLocaleString()}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      subscribers
-                    </span>
-                  </div>
-                  {plan.revenue > 0 && (
-                    <div className="flex items-center gap-2">
-                      <MdCurrencyRupee className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-2xl font-bold">
-                        {plan.revenue.toLocaleString()}
+            <Card key={idx} className="overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-6 w-16" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-4 w-10" />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+          : sortedPlans.map((plan) => (
+            <Card
+              key={plan.name}
+              className="overflow-hidden bg-gradient-card"
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="break-words">
+                    {plan.name.split(" - ").map((part, index) => (
+                      <span key={index}>
+                        {index > 0 && <br />}
+                        {part}
                       </span>
-                      <span className="text-sm text-muted-foreground">MRR</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                    ))}
+                  </span>
+                  <Badge
+                    variant={plan.name === "Free" ? "secondary" : "default"}
+                  >
+                    {plan.price}/mo
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-2xl font-bold">
+                    {plan.subscribers.toLocaleString()}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    subscribers
+                  </span>
+                </div>
+                {plan.revenue > 0 && (
+                  <div className="flex items-center gap-2">
+                    <MdCurrencyRupee className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-2xl font-bold">
+                      {plan.revenue.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground">MRR</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -513,54 +530,54 @@ export default function Subscriptions() {
             <TableBody>
               {loadingPayments
                 ? Array.from({ length: 6 }).map((_, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell className="font-medium">
-                        <Skeleton className="h-4 w-40" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-6 w-28" />
-                      </TableCell>
-                      <TableCell className="font-mono">
-                        <Skeleton className="h-4 w-20" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-4 w-28" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-6 w-24" />
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-4 w-40" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-28" />
+                    </TableCell>
+                    <TableCell className="font-mono">
+                      <Skeleton className="h-4 w-20" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-28" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-24" />
+                    </TableCell>
+                  </TableRow>
+                ))
                 : paymentHistory.map((payment, index) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell className="font-medium">
-                        {payment.user}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={`TabelCell ${getPlanColorClass(
-                            payment.plan
-                          )}`}
-                        >
-                          {payment.plan}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-mono">
-                        {Number(payment.price_usd / 100)  * exchangeRate}
-                      </TableCell>
-                      <TableCell>{payment.date}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={`TabelCell ${getStatusColorClass(
-                            payment.status
-                          )}`}
-                        >
-                          {payment.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableCell className="font-medium">
+                      {payment.user}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`TabelCell ${getPlanColorClass(
+                          payment.plan
+                        )}`}
+                      >
+                        {payment.plan}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono">
+                      {Number(payment.price_usd / 100) * exchangeRate}
+                    </TableCell>
+                    <TableCell>{payment.date}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`TabelCell ${getStatusColorClass(
+                          payment.status
+                        )}`}
+                      >
+                        {payment.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </CardContent>
