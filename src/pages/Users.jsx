@@ -402,17 +402,17 @@ export default function Users() {
     } else {
       // Use predefined ranges
       switch (range) {
-        case '7':
+        case "7":
           start = new Date(today);
           start.setDate(today.getDate() - 7);
           end = today;
           break;
-        case '30':
+        case "30":
           start = new Date(today);
           start.setDate(today.getDate() - 30);
           end = today;
           break;
-        case '90':
+        case "90":
           start = new Date(today);
           start.setDate(today.getDate() - 90);
           end = today;
@@ -424,35 +424,70 @@ export default function Users() {
     }
 
     return {
-      startDate: start ? start.toISOString().split('T')[0] : null,
-      endDate: end ? end.toISOString().split('T')[0] : null
+      startDate: start ? start.toISOString().split("T")[0] : null,
+      endDate: end ? end.toISOString().split("T")[0] : null,
     };
   };
 
-  const mockUserApi = async (page = 1, limit = 10, search = '', planId = null, sortOpt = 'words-desc', planStatus = 'all', activityStatus = 'all', dateRange = 'all') => {
+  const mockUserApi = async (
+    page = 1,
+    limit = 10,
+    search = "",
+    planId = null,
+    sortOpt = "words-desc",
+    planStatus = "all",
+    activityStatus = "all",
+    dateRange = "all"
+  ) => {
     try {
       setLoading(true);
-      const planStatusFilter = planStatus === 'all' ? null : planStatus;
-      const activityStatusParam = activityStatus === 'all' ? null : activityStatus;
-      
+      const planStatusFilter = planStatus === "all" ? null : planStatus;
+      const activityStatusParam =
+        activityStatus === "all" ? null : activityStatus;
+
       // Calculate date range
-      const { startDate: calculatedStartDate, endDate: calculatedEndDate } = calculateDateRange(
-        dateRange, 
-        customStartDate || null, 
-        customEndDate || null
+      const { startDate: calculatedStartDate, endDate: calculatedEndDate } =
+        calculateDateRange(
+          dateRange,
+          customStartDate || null,
+          customEndDate || null
+        );
+
+      console.log(
+        "API Call - planStatusFilter:",
+        planStatusFilter,
+        "activityStatus:",
+        activityStatusParam,
+        "dateRange:",
+        dateRange,
+        "startDate:",
+        calculatedStartDate,
+        "endDate:",
+        calculatedEndDate
       );
-      
-      console.log('API Call - planStatusFilter:', planStatusFilter, 'activityStatus:', activityStatusParam, 'dateRange:', dateRange, 'startDate:', calculatedStartDate, 'endDate:', calculatedEndDate);
-      
-      const response = await apiFunctions.getMockUser(page, limit, search, planId, sortOpt, activityStatusParam, calculatedStartDate, calculatedEndDate, planStatusFilter);
+
+      const response = await apiFunctions.getMockUser(
+        page,
+        limit,
+        search,
+        planId,
+        sortOpt,
+        activityStatusParam,
+        calculatedStartDate,
+        calculatedEndDate,
+        planStatusFilter
+      );
       if (response.data.status === 200) {
-        console.log('API Response - users count:', response.data.data.users?.length);
+        console.log(
+          "API Response - users count:",
+          response.data.data.users?.length
+        );
         setMockUser(response.data.data.users);
         setTotalPages(response.data.data.pagination.totalPages);
         setTotalRecords(response.data.data.pagination.totalRecords);
       }
     } catch (err) {
-      console.log('API Error:', err);
+      console.log("API Error:", err);
     } finally {
       setLoading(false);
     }
@@ -494,12 +529,40 @@ export default function Users() {
   };
 
   useEffect(() => {
-    mockUserApi(currentPage, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter, activityStatusFilter, dateRangeFilter);
-  }, [currentPage, searchQuery, selectedPlanId, sortBy, activityFilter, activityStatusFilter, dateRangeFilter, customStartDate, customEndDate]);
+    mockUserApi(
+      currentPage,
+      itemsPerPage,
+      searchQuery,
+      selectedPlanId,
+      sortBy,
+      activityFilter,
+      activityStatusFilter,
+      dateRangeFilter
+    );
+  }, [
+    currentPage,
+    searchQuery,
+    selectedPlanId,
+    sortBy,
+    activityFilter,
+    activityStatusFilter,
+    dateRangeFilter,
+    customStartDate,
+    customEndDate,
+  ]);
 
   // Initial load
   useEffect(() => {
-    mockUserApi(1, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter, activityStatusFilter, dateRangeFilter);
+    mockUserApi(
+      1,
+      itemsPerPage,
+      searchQuery,
+      selectedPlanId,
+      sortBy,
+      activityFilter,
+      activityStatusFilter,
+      dateRangeFilter
+    );
     fetchAllPlans();
   }, []);
 
@@ -680,7 +743,9 @@ export default function Users() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Search Users</label>
+              <label className="text-sm font-medium text-muted-foreground">
+                Search Users
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -692,14 +757,24 @@ export default function Users() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Plan Type</label>
-              <Select value={planFilter} onValueChange={(val)=>{
-                setPlanFilter(val);
-                if(val === 'all'){ setSelectedPlanId(null); return; }
-                const match = availablePlans.find(p=>p.name.toLowerCase()===val.toLowerCase());
-                setSelectedPlanId(match ? match.id : null);
-                setCurrentPage(1);
-              }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Plan Type
+              </label>
+              <Select
+                value={planFilter}
+                onValueChange={(val) => {
+                  setPlanFilter(val);
+                  if (val === "all") {
+                    setSelectedPlanId(null);
+                    return;
+                  }
+                  const match = availablePlans.find(
+                    (p) => p.name.toLowerCase() === val.toLowerCase()
+                  );
+                  setSelectedPlanId(match ? match.id : null);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Plan Type" />
                 </SelectTrigger>
@@ -720,12 +795,17 @@ export default function Users() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Plan Status</label>
-              <Select value={activityFilter} onValueChange={(v)=>{ 
-                console.log('Plan Status changed to:', v);
-                setActivityFilter(v); 
-                setCurrentPage(1); 
-              }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Plan Status
+              </label>
+              <Select
+                value={activityFilter}
+                onValueChange={(v) => {
+                  console.log("Plan Status changed to:", v);
+                  setActivityFilter(v);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Plan Status" />
                 </SelectTrigger>
@@ -733,19 +813,26 @@ export default function Users() {
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Trial">Trial</SelectItem>
-                  <SelectItem value="Free Trial Cancelled">Free Trial Cancelled</SelectItem>
+                  <SelectItem value="Free Trial Cancelled">
+                    Free Trial Cancelled
+                  </SelectItem>
                   <SelectItem value="Cancelled">Cancelled</SelectItem>
                   <SelectItem value="N/A">N/A</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Activity Status</label>
-              <Select value={activityStatusFilter} onValueChange={(v)=>{ 
-                console.log('Activity Status changed to:', v);
-                setActivityStatusFilter(v); 
-                setCurrentPage(1); 
-              }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Activity Status
+              </label>
+              <Select
+                value={activityStatusFilter}
+                onValueChange={(v) => {
+                  console.log("Activity Status changed to:", v);
+                  setActivityStatusFilter(v);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Activity Status" />
                 </SelectTrigger>
@@ -757,12 +844,17 @@ export default function Users() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-              <Select value={dateRangeFilter} onValueChange={(v)=>{ 
-                console.log('Date Range changed to:', v);
-                setDateRangeFilter(v); 
-                setCurrentPage(1); 
-              }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Date Range
+              </label>
+              <Select
+                value={dateRangeFilter}
+                onValueChange={(v) => {
+                  console.log("Date Range changed to:", v);
+                  setDateRangeFilter(v);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Date Range" />
                 </SelectTrigger>
@@ -776,30 +868,44 @@ export default function Users() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Sort By</label>
-              <Select value={sortBy} onValueChange={(v)=>{ setSortBy(v); setCurrentPage(1); }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Sort By
+              </label>
+              <Select
+                value={sortBy}
+                onValueChange={(v) => {
+                  setSortBy(v);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="words-desc">Words (High to Low)</SelectItem>
+                  <SelectItem value="words-desc">
+                    Words (High to Low)
+                  </SelectItem>
                   <SelectItem value="words-asc">Words (Low to High)</SelectItem>
                   <SelectItem value="images-desc">
                     Images (High to Low)
                   </SelectItem>
-                  <SelectItem value="images-asc">Images (Low to High)</SelectItem>
+                  <SelectItem value="images-asc">
+                    Images (Low to High)
+                  </SelectItem>
                   <SelectItem value="serp-desc">SERP (High to Low)</SelectItem>
                   <SelectItem value="serp-asc">SERP (Low to High)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-          
+
           {/* Custom Date Range Inputs */}
-          {dateRangeFilter === 'custom' && (
+          {dateRangeFilter === "custom" && (
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Start Date</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Start Date
+                </label>
                 <Input
                   type="date"
                   value={customStartDate}
@@ -810,7 +916,9 @@ export default function Users() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">End Date</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                  End Date
+                </label>
                 <Input
                   type="date"
                   value={customEndDate}
@@ -848,7 +956,7 @@ export default function Users() {
 
       <Card>
         <CardContent className="p-0">
-        {loading ? (
+          {loading ? (
             <Table>
               <TableHeader className="Tabel_Head">
                 <TableRow>
@@ -869,17 +977,39 @@ export default function Users() {
               <TableBody>
                 {Array.from({ length: 10 }).map((_, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="font-medium"><Skeleton className="h-4 w-10" /></TableCell>
-                    <TableCell className="font-medium"><Skeleton className="h-4 w-40" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-64" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-8 rounded-full" /></TableCell>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-4 w-10" />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-4 w-40" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-64" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-28" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-28" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-16 ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-12 ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-12 ml-auto" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -953,10 +1083,18 @@ export default function Users() {
                     <TableCell>
                       <Badge
                         className={`TabelCell ${getStatusColorClass(
-                          user.autoPay_canceled
+                          user.autoPay_canceled === true
+                            ? "disabled"
+                            : user.autoPay_canceled === false
+                            ? "enabled"
+                            : "na"
                         )}`}
                       >
-                        {user?.autoPay_canceled ? "Disabled" : "Enabled"}
+                        {user.autoPay_canceled === true
+                          ? "Disabled"
+                          : user.autoPay_canceled === false
+                          ? "Enabled"
+                          : "N/A"}
                       </Badge>
                     </TableCell>
                     <TableCell className="TabelCell">{user.joinDate}</TableCell>
@@ -966,9 +1104,7 @@ export default function Users() {
                     <TableCell className="text-right ">
                       {user.wordCount.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right ">
-                      {user.images}
-                    </TableCell>
+                    <TableCell className="text-right ">{user.images}</TableCell>
                     <TableCell className="text-right ">
                       {user.serpUsage}
                     </TableCell>
@@ -1061,7 +1197,7 @@ export default function Users() {
                                       Images Used
                                     </p>
                                     <p className="text-lg font-semibold">
-                          {userDetailsData.usageStats.imagesUsed}
+                                      {userDetailsData.usageStats.imagesUsed}
                                     </p>
                                   </div>
                                   <div className="space-y-1">
