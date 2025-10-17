@@ -370,10 +370,14 @@ export default function Users() {
   const [planFilter, setPlanFilter] = useState("all");
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [activityFilter, setActivityFilter] = useState("all");
+  const [activityStatusFilter, setActivityStatusFilter] = useState("all");
+  const [dateRangeFilter, setDateRangeFilter] = useState("all");
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
   const [sortBy, setSortBy] = useState("words-desc");
   // Optional range (future UI hook). Keep nulls so backend interprets correctly.
-  const [startDate] = useState(null);
-  const [endDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [mockUsers, setMockUser] = useState([]);
@@ -385,18 +389,70 @@ export default function Users() {
   const [availablePlans, setAvailablePlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
 
-  const mockUserApi = async (page = 1, limit = 10, search = '', planId = null, sortOpt = 'words-desc', activity = 'all') => {
+  // Function to calculate date range based on selection
+  const calculateDateRange = (range, customStart = null, customEnd = null) => {
+    const today = new Date();
+    let start = null;
+    let end = null;
+
+    if (customStart && customEnd) {
+      // Use custom dates
+      start = new Date(customStart);
+      end = new Date(customEnd);
+    } else {
+      // Use predefined ranges
+      switch (range) {
+        case '7':
+          start = new Date(today);
+          start.setDate(today.getDate() - 7);
+          end = today;
+          break;
+        case '30':
+          start = new Date(today);
+          start.setDate(today.getDate() - 30);
+          end = today;
+          break;
+        case '90':
+          start = new Date(today);
+          start.setDate(today.getDate() - 90);
+          end = today;
+          break;
+        default:
+          start = null;
+          end = null;
+      }
+    }
+
+    return {
+      startDate: start ? start.toISOString().split('T')[0] : null,
+      endDate: end ? end.toISOString().split('T')[0] : null
+    };
+  };
+
+  const mockUserApi = async (page = 1, limit = 10, search = '', planId = null, sortOpt = 'words-desc', planStatus = 'all', activityStatus = 'all', dateRange = 'all') => {
     try {
       setLoading(true);
-      const activityStatus = activity === 'all' ? null : activity;
-      const response = await apiFunctions.getMockUser(page, limit, search, planId, sortOpt, activityStatus, startDate, endDate);
+      const planStatusFilter = planStatus === 'all' ? null : planStatus;
+      const activityStatusParam = activityStatus === 'all' ? null : activityStatus;
+      
+      // Calculate date range
+      const { startDate: calculatedStartDate, endDate: calculatedEndDate } = calculateDateRange(
+        dateRange, 
+        customStartDate || null, 
+        customEndDate || null
+      );
+      
+      console.log('API Call - planStatusFilter:', planStatusFilter, 'activityStatus:', activityStatusParam, 'dateRange:', dateRange, 'startDate:', calculatedStartDate, 'endDate:', calculatedEndDate);
+      
+      const response = await apiFunctions.getMockUser(page, limit, search, planId, sortOpt, activityStatusParam, calculatedStartDate, calculatedEndDate, planStatusFilter);
       if (response.data.status === 200) {
+        console.log('API Response - users count:', response.data.data.users?.length);
         setMockUser(response.data.data.users);
         setTotalPages(response.data.data.pagination.totalPages);
         setTotalRecords(response.data.data.pagination.totalRecords);
       }
     } catch (err) {
-      console.log(err);
+      console.log('API Error:', err);
     } finally {
       setLoading(false);
     }
@@ -438,12 +494,12 @@ export default function Users() {
   };
 
   useEffect(() => {
-    mockUserApi(currentPage, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter);
-  }, [currentPage, searchQuery, selectedPlanId, sortBy, activityFilter]);
+    mockUserApi(currentPage, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter, activityStatusFilter, dateRangeFilter);
+  }, [currentPage, searchQuery, selectedPlanId, sortBy, activityFilter, activityStatusFilter, dateRangeFilter, customStartDate, customEndDate]);
 
   // Initial load
   useEffect(() => {
-    mockUserApi(1, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter);
+    mockUserApi(1, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter, activityStatusFilter, dateRangeFilter);
     fetchAllPlans();
   }, []);
 
@@ -463,43 +519,8 @@ export default function Users() {
   };
 
   console.log("planFilter", planFilter);
-  console.log("mockUsers", mockUsers); // Client-side filtering (since API doesn't support filtering yet)
-  const filteredAndSortedUsers = mockUsers
-    .filter((user) => {
-      const matchesSearch =
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Fix plan filtering to work with dynamic plans
-      const userPlan = user.plan;
-      const matchesPlan =
-        planFilter === "all" ||
-        (userPlan && userPlan.toLowerCase() === planFilter.toLowerCase());
-
-      const matchesStatus =
-        activityFilter === "all" ||
-        (activityFilter === "N/A" && (!user.status || user.status === "N/A" || user.status === "")) ||
-        (user.status && user.status === activityFilter);
-      return matchesSearch && matchesPlan && matchesStatus;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "words-desc":
-          return b.wordCount - a.wordCount;
-        case "words-asc":
-          return a.wordCount - b.wordCount;
-        case "images-desc":
-          return b.images - a.images;
-        case "images-asc":
-          return a.images - b.images;
-        case "serp-desc":
-          return b.serpUsage - a.serpUsage;
-        case "serp-asc":
-          return a.serpUsage - b.serpUsage;
-        default:
-          return 0;
-      }
-    });
+  console.log("mockUsers", mockUsers); // Data is now filtered by API
+  const filteredAndSortedUsers = mockUsers; // No client-side filtering needed since API handles it
 
   // Reset to first page when filters change
   // useEffect(() => {
@@ -657,7 +678,7 @@ export default function Users() {
           <CardTitle>Filters & Search</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Search Users</label>
               <div className="relative">
@@ -700,7 +721,11 @@ export default function Users() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Plan Status</label>
-              <Select value={activityFilter} onValueChange={(v)=>{ setActivityFilter(v); setCurrentPage(1); }}>
+              <Select value={activityFilter} onValueChange={(v)=>{ 
+                console.log('Plan Status changed to:', v);
+                setActivityFilter(v); 
+                setCurrentPage(1); 
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Plan Status" />
                 </SelectTrigger>
@@ -711,6 +736,42 @@ export default function Users() {
                   <SelectItem value="Free Trial Cancelled">Free Trial Cancelled</SelectItem>
                   <SelectItem value="Cancelled">Cancelled</SelectItem>
                   <SelectItem value="N/A">N/A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Activity Status</label>
+              <Select value={activityStatusFilter} onValueChange={(v)=>{ 
+                console.log('Activity Status changed to:', v);
+                setActivityStatusFilter(v); 
+                setCurrentPage(1); 
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Activity Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Activity</SelectItem>
+                  <SelectItem value="active">Active Users</SelectItem>
+                  <SelectItem value="inactive">Inactive Users</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Date Range</label>
+              <Select value={dateRangeFilter} onValueChange={(v)=>{ 
+                console.log('Date Range changed to:', v);
+                setDateRangeFilter(v); 
+                setCurrentPage(1); 
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Date Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="7">Last 7 Days</SelectItem>
+                  <SelectItem value="30">Last 30 Days</SelectItem>
+                  <SelectItem value="90">Last 90 Days</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -733,6 +794,34 @@ export default function Users() {
               </Select>
             </div>
           </div>
+          
+          {/* Custom Date Range Inputs */}
+          {dateRangeFilter === 'custom' && (
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Start Date</label>
+                <Input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => {
+                    setCustomStartDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">End Date</label>
+                <Input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => {
+                    setCustomEndDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
