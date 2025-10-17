@@ -14,7 +14,7 @@ import {
 import { DollarSign, Users, TrendingUp } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CouponModal from "./CouponModal";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import apiFunctions from "@/api/apiFunctions";
 import Pagination from "@/components/Pagination/Pagination.jsx";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -164,7 +164,7 @@ export default function Subscriptions() {
     }
   };
 
-  const getPaymentHistoryDataApi = async (page = 1, limit = 10) => {
+  const getPaymentHistoryDataApi = useCallback(async (page = 1, limit = 10) => {
     try {
       setLoadingPayments(true);
       const response = await apiFunctions.getPaymentHistory(page, limit);
@@ -178,9 +178,9 @@ export default function Subscriptions() {
     } finally {
       setLoadingPayments(false);
     }
-  };
+  },[]);
 
-  const getCouponsApi = async (page = 1, limit = 10) => {
+  const getCouponsApi = useCallback(async (page = 1, limit = 10) => {
     try {
       setLoadingCoupons(true);
       const response = await apiFunctions.getCoupons(page, limit);
@@ -196,9 +196,9 @@ export default function Subscriptions() {
     } finally {
       setLoadingCoupons(false);
     }
-  };
+  },[]);
 
-  const fetchExchangeRate = async () => {
+  const fetchExchangeRate = useCallback(async () => {
     try {
       // Using exchangerate-api.com (free tier)
       const response = await axios.get(
@@ -211,13 +211,18 @@ export default function Subscriptions() {
       console.error("Failed to fetch exchange rate:", error);
       // Don't set any fallback rate, let the component handle it
     }
-  };
+  },[]);
+
+  const handleCouponCreated = useCallback(() => {
+  
+  getCouponsApi(1, 10);
+}, [getCouponsApi]);
 
   useEffect(() => {
     fetchExchangeRate(); // Fetch current exchange rate
     getPaymentHistoryDataApi(currentPage, itemsPerPage);
     getCouponsApi(1, 10);
-  }, []);
+  }, [fetchExchangeRate, getPaymentHistoryDataApi, getCouponsApi]);
 
   // Fetch plans data when exchange rate is available
   useEffect(() => {
@@ -570,6 +575,7 @@ export default function Subscriptions() {
       <CouponModal
         isOpen={isCouponModalOpen}
         onClose={() => setIsCouponModalOpen(false)}
+        handleCouponCreated={handleCouponCreated}
       />
     </div>
   );

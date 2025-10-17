@@ -141,7 +141,7 @@ export default function CreditUsage() {
   const [modelDistributionData, setModelDistributionData] =
     useState([]);
   const [totals, setTotals] = useState({
-    total_credits_consumed: null,
+    total_openai_credits_consumed: null,
     average_credits_per_user: null,
     total_users: null,
     timestamp: null,
@@ -149,26 +149,42 @@ export default function CreditUsage() {
   const [loading, setLoading] = useState(true);
   const fetchHeatmap = async () => {
     const res = await apiFunctions.getFeatureUsageHeatmap(7);
-    if (res?.success && Array.isArray(res?.data)) {
-      setHeatmapData(res.data);
+    const raw = Array.isArray(res?.data) ? res?.data : res?.data?.data;
+    if (res?.success && Array.isArray(raw)) {
+      setHeatmapData(raw);
     }
   };
   const fetchCreditsByUser = async () => {
-    const res = await apiFunctions.getCreditsByUser(5);
-    if (res?.success && Array.isArray(res?.data)) {
-      setCreditsByUserData(res.data);
+    const res = await apiFunctions.getTopActiveUsers(5, 30);
+    const raw = Array.isArray(res?.data) ? res?.data : res?.data?.data;
+    if (res?.success && Array.isArray(raw)) {
+      const normalized = raw.map((item) => ({
+        email: item?.email,
+        plan: item?.plan_type,
+        used:
+          typeof item?.words_used === "string"
+            ? Number(item?.words_used)
+            : item?.words_used ?? 0,
+        remaining:
+          typeof item?.words_remaining === "string"
+            ? Number(item?.words_remaining)
+            : item?.words_remaining ?? 0,
+      }));
+      setCreditsByUserData(normalized);
     }
   };
   const fetchAverageCredits = async () => {
-    const res = await apiFunctions.getAverageCreditsPerActiveUser();
-    if (res?.success && Array.isArray(res?.data)) {
-      setAvgCredits(res.data);
+    const res = await apiFunctions?.getAverageCreditsPerActiveUser();
+    const raw = Array.isArray(res?.data) ? res?.data : res?.data?.data;
+    if (res?.success && Array.isArray(raw)) {
+      setAvgCredits(raw);
     }
   };
   const fetchAiModelUsage = async () => {
     const res = await apiFunctions.getAiModelUsageBreakdown();
-    if (res?.success && Array.isArray(res?.data)) {
-      const normalized = res.data.map((item) => ({
+    const raw = Array.isArray(res?.data) ? res?.data : res?.data?.data;
+    if (res?.success && Array.isArray(raw)) {
+      const normalized = raw.map((item) => ({
         ...item,
         tokens:
           typeof item.tokens === "string" ? Number(item.tokens) : item.tokens,
@@ -178,7 +194,8 @@ export default function CreditUsage() {
   };
   const fetchModelDistribution = async () => {
     const res = await apiFunctions.getFeatureUsageDistribution();
-    if (res?.success && Array.isArray(res?.data)) {
+    const raw = Array.isArray(res?.data) ? res?.data : res?.data?.data;
+    if (res?.success && Array.isArray(raw)) {
       const COLORS = [
         "hsl(217 91% 60%)",
         "hsl(142 76% 36%)",
@@ -186,7 +203,7 @@ export default function CreditUsage() {
         "hsl(280 65% 60%)",
         "hsl(200 70% 50%)",
       ];
-      const normalized = res.data.map((item, index) => ({
+      const normalized = raw.map((item, index) => ({
         name: item.name,
         value: typeof item.value === "string" ? Number(item.value) : item.value,
         color: COLORS[index % COLORS.length],
@@ -196,23 +213,23 @@ export default function CreditUsage() {
   };
   const fetchTotals = async () => {
     const res = await apiFunctions.getTotalCreditsConsumed();
-    if (res?.success && res?.data) {
-      // Normalize potential string numbers
-      const data = res.data;
+    const payload = res?.data?.data || res?.data;
+    if (res?.success && payload) {
+      const inr = payload?.inr || payload;
       setTotals({
         total_credits_consumed:
-          typeof data.total_credits_consumed === "string"
-            ? Number(data.total_credits_consumed)
-            : data.total_credits_consumed,
+          typeof inr?.total_openai_credits_consumed === "string"
+            ? Number(inr?.total_openai_credits_consumed)
+            : inr?.total_openai_credits_consumed,
         average_credits_per_user:
-          typeof data.average_credits_per_user === "string"
-            ? Number(data.average_credits_per_user)
-            : data.average_credits_per_user,
+          typeof inr?.average_credits_per_user === "string"
+            ? Number(inr?.average_credits_per_user)
+            : inr?.average_credits_per_user,
         total_users:
-          typeof data.total_users === "string"
-            ? Number(data.total_users)
-            : data.total_users,
-        timestamp: data.timestamp || null,
+          typeof payload?.total_users === "string"
+            ? Number(payload.total_users)
+            : payload?.total_users,
+        timestamp: payload?.timestamp || null,
       });
     }
   };
@@ -249,15 +266,15 @@ export default function CreditUsage() {
                 <p className="text-sm font-medium text-muted-foreground">
                   Total Credits Used
                 </p>
-                <p className="text-3xl font-bold">
+                <p className="text-3xl font-bold">₹
                   {loading ? (
                     <Skeleton className="h-8 w-24" />
+                  ) : totals?.total_credits_consumed !== null && totals?.total_credits_consumed !== undefined ? (
+                    Number(totals.total_credits_consumed).toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })
                   ) : (
-                    totals.total_credits_consumed !== null
-                      ? totals.total_credits_consumed.toLocaleString(undefined, {
-                          maximumFractionDigits: 2,
-                        })
-                      : "—"
+                    "—"
                   )}
                 </p>
               </div>
@@ -272,16 +289,16 @@ export default function CreditUsage() {
                 <p className="text-sm font-medium text-muted-foreground">
                   Avg Credits/User
                 </p>
-                <p className="text-3xl font-bold">
+                <p className="text-3xl font-bold"> ₹ 
                   {loading ? (
                     <Skeleton className="h-8 w-24" />
+                  ) : totals?.average_credits_per_user !== null && totals?.average_credits_per_user !== undefined ? (
+                    Number(totals.average_credits_per_user).toLocaleString(
+                      undefined,
+                      { maximumFractionDigits: 2 }
+                    )
                   ) : (
-                    totals.average_credits_per_user !== null
-                      ? totals.average_credits_per_user.toLocaleString(
-                          undefined,
-                          { maximumFractionDigits: 2 }
-                        )
-                      : "—"
+                    "—"
                   )}
                 </p>
               </div>
@@ -343,7 +360,7 @@ export default function CreditUsage() {
                           </p>
                           {model.tokens > 0 && (
                             <p className="text-sm text-muted-foreground">
-                              {(model.tokens / 1000000).toFixed(1)}M tokens
+                              {(model?.tokens / 1000000).toFixed(1)}M tokens
                             </p>
                           )}
                         </div>
@@ -351,7 +368,7 @@ export default function CreditUsage() {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary transition-all"
-                          style={{ width: `${(model.requests / 68850) * 100}%` }}
+                          style={{ width: `${(model?.requests / 68850) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -382,7 +399,7 @@ export default function CreditUsage() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {modelDistributionData.map((entry, index) => (
+                      {modelDistributionData?.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -425,7 +442,7 @@ export default function CreditUsage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Credits by User (Top 5)</CardTitle>
+          <CardTitle>Credits by User - Words (Top 5)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -458,8 +475,8 @@ export default function CreditUsage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-primary">{user?.used.toLocaleString()} used</p>
-                      <p className="text-sm text-muted-foreground">{user?.remaining.toLocaleString()} remaining</p>
+                      <p className="font-bold text-primary">{user?.used?.toLocaleString()} used</p>
+                      <p className="text-sm text-muted-foreground">{user?.remaining?.toLocaleString()} remaining</p>
                     </div>
                     <div className="w-full sm:w-24 h-2 bg-muted rounded-full overflow-hidden">
                       <div

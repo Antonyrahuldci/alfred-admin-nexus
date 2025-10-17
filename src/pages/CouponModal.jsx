@@ -24,7 +24,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 
-const CouponModal = ({ isOpen, onClose }) => {
+const CouponModal = ({ isOpen, onClose ,onCouponCreated }) => {
   const [users, setUsers] = useState([]);
   const [emails, setEmails] = useState([]);
   const [emailInput, setEmailInput] = useState("");
@@ -38,6 +38,8 @@ const CouponModal = ({ isOpen, onClose }) => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
   const [showDropdown, setShowDropdown] = useState(false);
+  
+
 
   const showSnackbar = useCallback((message, severity = "info") => {
     setSnackbarMessage(message);
@@ -112,6 +114,7 @@ const CouponModal = ({ isOpen, onClose }) => {
       });
 
       if (res?.status === 200) {
+         if (onCouponCreated) onCouponCreated();
         showSnackbar("Coupon sent successfully!", "success");
         onClose();
       } else {
