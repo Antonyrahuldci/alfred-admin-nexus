@@ -25,9 +25,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import apiFunctions from "../api/apiFunctions";
 import { Skeleton } from "@/components/ui/skeleton";
+import axios from "axios";
 
 // const userGrowthData = [
 //   { month: "Jan", users: 1200 },
@@ -74,7 +75,26 @@ export default function Overview() {
   const [loadingRevenue, setLoadingRevenue] = useState(true);
   const [loadingFeature, setLoadingFeature] = useState(true);
   const [loadingActivity, setLoadingActivity] = useState(true);
+  const [exchangeRate, setExchangeRate] = useState(null);
 
+   const fetchExchangeRate = useCallback(async () => {
+      try {
+        // Using exchangerate-api.com (free tier)
+        const response = await axios.get(
+          "https://api.exchangerate-api.com/v4/latest/USD"
+        );
+        const inrRate = response.data.rates.INR;
+        setExchangeRate(inrRate);
+        console.log("Current USD to INR rate:", inrRate);
+      } catch (error) {
+        console.error("Failed to fetch exchange rate:", error);
+        // Don't set any fallback rate, let the component handle it
+      }
+    },[]);
+console.log("exchangeRate",exchangeRate)
+    useEffect(()=>{
+fetchExchangeRate()
+    },[])
   const getUserGrowthMonth = async () => {
     try {
       const response = await apiFunctions.getUsersGrowthMonthly();
@@ -182,14 +202,48 @@ export default function Overview() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex items-center flex-wrap justify-between">
+        <div>
+
         <h1 className="text-3xl font-bold text-foreground">Overview</h1>
         <p className="text-muted-foreground">
           Welcome to your Simbli Admin dashboard
         </p>
+        </div>
+        {exchangeRate && (
+                  <Card className="overflow-hidden bg-gradient-card w-72">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Exchange Rate
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-foreground">
+                              $1
+                            </span>
+                            <span className="text-muted-foreground">=</span>
+                            <span className="text-lg font-bold text-primary">
+                              ₹{exchangeRate.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="rounded-lg bg-primary/10 p-2">
+                          <div className="flex items-center gap-1">
+                            <div
+                              className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                              title="Live Rate"
+                            ></div>
+                            <span className="text-xs text-muted-foreground">Live</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {loadingStats ? (
           <>
             <Card>
@@ -239,19 +293,17 @@ export default function Overview() {
               }
               icon={UserCheck}
               trend={{
-                value: Math.abs(dashboardStats.activeUsersToday.change || 0),
-                isPositive: (dashboardStats.activeUsersToday.change || 0) >= 0,
+                value: Math.abs(dashboardStats?.activeUsersToday.change || 0),
+                isPositive: (dashboardStats?.activeUsersToday.change || 0) >= 0,
               }}
             />
             <StatCard
               title="Total Revenue"
-              value={`₹${(
-                (dashboardStats.totalRevenue.value || 0) / 100
-              ).toLocaleString()}`}
+              value={`₹${((((dashboardStats?.totalRevenue?.value || 0) / 100) * (exchangeRate || 0))).toLocaleString()}`}
               icon={MdCurrencyRupee}
               trend={{
-                value: Math.abs(dashboardStats.totalRevenue.change || 0),
-                isPositive: (dashboardStats.totalRevenue.change || 0) >= 0,
+                value: Math.abs(dashboardStats?.totalRevenue?.change || 0),
+                isPositive: (dashboardStats?.totalRevenue?.change || 0) >= 0,
               }}
             />
           </>
@@ -373,7 +425,7 @@ export default function Overview() {
                   <YAxis
                     stroke="hsl(var(--muted-foreground))"
                     tickFormatter={(value) => {
-                      const inrValue = value / 100;
+                      const inrValue = ((value / 100) * (exchangeRate || 0));
                       if (inrValue >= 1000) {
                         return `₹${(inrValue / 1000).toFixed(1)}k`;
                       }
@@ -387,7 +439,7 @@ export default function Overview() {
                       borderRadius: "0.5rem",
                     }}
                     formatter={(value) => [
-                      `₹${(value / 100).toLocaleString()}`,
+                      `₹${(((value / 100) * (exchangeRate || 0))).toLocaleString()}`,
                       "Revenue",
                     ]}
                   />

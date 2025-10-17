@@ -245,7 +245,7 @@ export default function Subscriptions() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center flex-wrap justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Subscriptions</h1>
           <p className="text-muted-foreground">
@@ -547,7 +547,7 @@ export default function Subscriptions() {
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono">
-                        {payment.amount}
+                        {Number(payment.price_usd / 100)  * exchangeRate}
                       </TableCell>
                       <TableCell>{payment.date}</TableCell>
                       <TableCell>
