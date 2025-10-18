@@ -496,9 +496,65 @@ export default function Users() {
   const fetchUserDetails = async (userId) => {
     try {
       setUserDetailsLoading(true);
-      const response = await apiFunctions.getUserUsageData(userId);
-      if (response.data.status === 200) {
-        setUserDetailsData(response.data.data);
+      
+      // Fetch both APIs in parallel
+      const [userDetailsResponse, usageSummaryResponse] = await Promise.all([
+        apiFunctions.getUserUsageData(userId),
+        apiFunctions.getUsageSummary(userId)
+      ]);
+      
+      console.log("User Details API Response:", userDetailsResponse);
+      console.log("Usage Summary API Response:", usageSummaryResponse);
+      
+      if (userDetailsResponse.data.status === 200) {
+        // Use the existing user details data
+        const userData = userDetailsResponse.data.data;
+        
+        // Transform daily_breakdown from usage summary API for chart
+        let usageTrends = [];
+        if (usageSummaryResponse.success && usageSummaryResponse.data.daily_breakdown) {
+          const dailyBreakdown = usageSummaryResponse.data.daily_breakdown;
+          const dates = Object.keys(dailyBreakdown).sort();
+          
+          // Get the date range (last 7 days from the latest date)
+          const latestDate = new Date(dates[dates.length - 1]);
+          const startDate = new Date(latestDate);
+          startDate.setDate(latestDate.getDate() - 6); // 7 days total including latest date
+          
+          // Generate array of last 7 days
+          const last7Days = [];
+          for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            const dateString = currentDate.toISOString().split('T')[0];
+            
+            last7Days.push({
+              day: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
+              contentWordsUsed: dailyBreakdown[dateString]?.words || 0,
+              imagesUsed: dailyBreakdown[dateString]?.images || 0,
+              serpSearchesUsed: dailyBreakdown[dateString]?.searches || 0,
+              cost: dailyBreakdown[dateString]?.cost || 0,
+              tokens: dailyBreakdown[dateString]?.tokens || 0,
+              date: dateString
+            });
+          }
+          
+          usageTrends = last7Days;
+        }
+
+        console.log("Transformed usage trends:", usageTrends);
+
+        // Combine user details with usage trends from daily breakdown
+        const combinedData = {
+          ...userData,
+          usageTrends: usageTrends.length > 0 ? usageTrends : userData.usageTrends || []
+        };
+
+        console.log("Final combined data:", combinedData);
+        setUserDetailsData(combinedData);
+      } else {
+        console.log("User details API call failed:", userDetailsResponse.data.message);
+        setUserDetailsData(null);
       }
     } catch (err) {
       console.log("Error fetching user details:", err);
@@ -1219,47 +1275,63 @@ export default function Users() {
                                 <h3 className="mb-4 text-lg font-semibold">
                                   Usage Trends (Last 7 Days)
                                 </h3>
-                                <ResponsiveContainer width="100%" height={200}>
-                                  <LineChart data={userDetailsData.usageTrends}>
-                                    <CartesianGrid
-                                      strokeDasharray="3 3"
-                                      stroke="hsl(var(--border))"
-                                    />
-                                    <XAxis
-                                      dataKey="day"
-                                      stroke="hsl(var(--muted-foreground))"
-                                    />
-                                    <YAxis stroke="hsl(var(--muted-foreground))" />
-                                    <Tooltip
-                                      contentStyle={{
-                                        backgroundColor: "hsl(var(--card))",
-                                        border: "1px solid hsl(var(--border))",
-                                        borderRadius: "0.5rem",
-                                      }}
-                                    />
-                                    <Line
-                                      type="monotone"
-                                      dataKey="contentWordsUsed"
-                                      stroke="hsl(var(--primary))"
-                                      strokeWidth={2}
-                                      name="Content Words"
-                                    />
-                                    <Line
-                                      type="monotone"
-                                      dataKey="imagesUsed"
-                                      stroke="hsl(var(--success))"
-                                      strokeWidth={2}
-                                      name="Images"
-                                    />
-                                    <Line
-                                      type="monotone"
-                                      dataKey="serpSearchesUsed"
-                                      stroke="hsl(var(--warning))"
-                                      strokeWidth={2}
-                                      name="SERP Searches"
-                                    />
-                                  </LineChart>
-                                </ResponsiveContainer>
+                                {userDetailsData.usageTrends && userDetailsData.usageTrends.length > 0 ? (
+                                  <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={userDetailsData.usageTrends}>
+                                      <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="hsl(var(--border))"
+                                      />
+                                      <XAxis
+                                        dataKey="day"
+                                        stroke="hsl(var(--muted-foreground))"
+                                      />
+                                      <YAxis 
+                                        stroke="hsl(var(--muted-foreground))"
+                                        domain={[0, 'dataMax']}
+                                      />
+                                      <Tooltip
+                                        contentStyle={{
+                                          backgroundColor: "hsl(var(--card))",
+                                          border: "1px solid hsl(var(--border))",
+                                          borderRadius: "0.5rem",
+                                        }}
+                                        formatter={(value, name) => [value.toLocaleString(), name]}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="contentWordsUsed"
+                                        stroke="hsl(var(--primary))"
+                                        strokeWidth={2}
+                                        name="Content Words"
+                                        dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
+                                        connectNulls={false}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="imagesUsed"
+                                        stroke="hsl(var(--success))"
+                                        strokeWidth={2}
+                                        name="Images"
+                                        dot={{ fill: "hsl(var(--success))", strokeWidth: 2, r: 4 }}
+                                        connectNulls={false}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="serpSearchesUsed"
+                                        stroke="hsl(var(--warning))"
+                                        strokeWidth={2}
+                                        name="SERP Searches"
+                                        dot={{ fill: "hsl(var(--warning))", strokeWidth: 2, r: 4 }}
+                                        connectNulls={false}
+                                      />
+                                    </LineChart>
+                                  </ResponsiveContainer>
+                                ) : (
+                                  <div className="flex justify-center items-center h-48 text-muted-foreground">
+                                    No usage data available for the selected period
+                                  </div>
+                                )}
                               </div>
 
                               {/* Recent Activities */}
