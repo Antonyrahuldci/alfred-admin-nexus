@@ -498,53 +498,70 @@ export default function Users() {
       setUserDetailsLoading(true);
       
       // Fetch both APIs in parallel
-      const [userDetailsResponse, usageSummaryResponse] = await Promise.all([
+      const [userDetailsResponse, usageTrendsResponse] = await Promise.all([
         apiFunctions.getUserUsageData(userId),
-        apiFunctions.getUsageSummary(userId)
+        apiFunctions.getUsageTrends(userId)
       ]);
       
       console.log("User Details API Response:", userDetailsResponse);
-      console.log("Usage Summary API Response:", usageSummaryResponse);
+      console.log("Usage Trends API Response:", usageTrendsResponse);
       
       if (userDetailsResponse.data.status === 200) {
         // Use the existing user details data
         const userData = userDetailsResponse.data.data;
         
-        // Transform daily_breakdown from usage summary API for chart
+        // Transform usage trends data for chart
         let usageTrends = [];
-        if (usageSummaryResponse.success && usageSummaryResponse.data.daily_breakdown) {
-          const dailyBreakdown = usageSummaryResponse.data.daily_breakdown;
-          const dates = Object.keys(dailyBreakdown).sort();
+        if (usageTrendsResponse.data && usageTrendsResponse.data.status === 200 && usageTrendsResponse.data.data) {
+          const trendsData = usageTrendsResponse.data.data;
           
-          // Get the date range (last 7 days from the latest date)
-          const latestDate = new Date(dates[dates.length - 1]);
-          const startDate = new Date(latestDate);
-          startDate.setDate(latestDate.getDate() - 6); // 7 days total including latest date
-          
-          // Generate array of last 7 days
-          const last7Days = [];
-          for (let i = 0; i < 7; i++) {
-            const currentDate = new Date(startDate);
-            currentDate.setDate(startDate.getDate() + i);
-            const dateString = currentDate.toISOString().split('T')[0];
+          // Check if the API returns data in the expected format
+          if (Array.isArray(trendsData)) {
+            // If it's already an array, use it directly
+            usageTrends = trendsData.map(item => ({
+              day: new Date(item.date || item.day).toLocaleDateString('en-US', { weekday: 'short' }),
+              contentWordsUsed: item.contentWordsUsed || item.words || 0,
+              imagesUsed: item.imagesUsed || item.images || 0,
+              serpSearchesUsed: item.serpSearchesUsed || item.searches || 0,
+              cost: item.cost || 0,
+              tokens: item.tokens || 0,
+              date: item.date || item.day
+            }));
+          } else if (trendsData.daily_breakdown) {
+            // If it has daily_breakdown structure, process it
+            const dailyBreakdown = trendsData.daily_breakdown;
+            const dates = Object.keys(dailyBreakdown).sort();
             
-            last7Days.push({
-              day: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
-              contentWordsUsed: dailyBreakdown[dateString]?.words || 0,
-              imagesUsed: dailyBreakdown[dateString]?.images || 0,
-              serpSearchesUsed: dailyBreakdown[dateString]?.searches || 0,
-              cost: dailyBreakdown[dateString]?.cost || 0,
-              tokens: dailyBreakdown[dateString]?.tokens || 0,
-              date: dateString
-            });
+            // Get the date range (last 7 days from the latest date)
+            const latestDate = new Date(dates[dates.length - 1]);
+            const startDate = new Date(latestDate);
+            startDate.setDate(latestDate.getDate() - 6); // 7 days total including latest date
+            
+            // Generate array of last 7 days
+            const last7Days = [];
+            for (let i = 0; i < 7; i++) {
+              const currentDate = new Date(startDate);
+              currentDate.setDate(startDate.getDate() + i);
+              const dateString = currentDate.toISOString().split('T')[0];
+              
+              last7Days.push({
+                day: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
+                contentWordsUsed: dailyBreakdown[dateString]?.words || 0,
+                imagesUsed: dailyBreakdown[dateString]?.images || 0,
+                serpSearchesUsed: dailyBreakdown[dateString]?.searches || 0,
+                cost: dailyBreakdown[dateString]?.cost || 0,
+                tokens: dailyBreakdown[dateString]?.tokens || 0,
+                date: dateString
+              });
+            }
+            
+            usageTrends = last7Days;
           }
-          
-          usageTrends = last7Days;
         }
 
         console.log("Transformed usage trends:", usageTrends);
 
-        // Combine user details with usage trends from daily breakdown
+        // Combine user details with usage trends
         const combinedData = {
           ...userData,
           usageTrends: usageTrends.length > 0 ? usageTrends : userData.usageTrends || []
