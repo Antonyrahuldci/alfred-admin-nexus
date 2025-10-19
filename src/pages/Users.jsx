@@ -509,54 +509,45 @@ export default function Users() {
       if (userDetailsResponse.data.status === 200) {
         // Use the existing user details data
         const userData = userDetailsResponse.data.data;
-        
+        console.log("userData",userData)
         // Transform usage trends data for chart
         let usageTrends = [];
-        if (usageTrendsResponse.data && usageTrendsResponse.data.status === 200 && usageTrendsResponse.data.data) {
-          const trendsData = usageTrendsResponse.data.data;
-          
+        console.log("usageTrendsResponse.data",usageTrendsResponse?.data)
+        if (usageTrendsResponse?.data) {
+          console.log("HIII")
+          const trendsData = usageTrendsResponse.data;
+          console.log("trendsData",trendsData)
           // Check if the API returns data in the expected format
           if (Array.isArray(trendsData)) {
-            // If it's already an array, use it directly
-            usageTrends = trendsData.map(item => ({
-              day: new Date(item.date || item.day).toLocaleDateString('en-US', { weekday: 'short' }),
-              contentWordsUsed: item.contentWordsUsed || item.words || 0,
-              imagesUsed: item.imagesUsed || item.images || 0,
-              serpSearchesUsed: item.serpSearchesUsed || item.searches || 0,
-              cost: item.cost || 0,
-              tokens: item.tokens || 0,
-              date: item.date || item.day
-            }));
-          } else if (trendsData.daily_breakdown) {
-            // If it has daily_breakdown structure, process it
-            const dailyBreakdown = trendsData.daily_breakdown;
-            const dates = Object.keys(dailyBreakdown).sort();
+            // Use the data exactly as it comes from the API, but sort by date to ensure correct order
+            usageTrends = trendsData
+              .map(item => ({
+                day: item?.day || item?.date, // Use the day field directly from API
+                contentWordsUsed: item?.contentWordsUsed || item?.words || 0,
+                imagesUsed: item?.imagesUsed || item?.images || 0,
+                serpSearchesUsed: item?.serpSearchesUsed || item?.searches || 0,
+                cost: item?.cost || 0,
+                tokens: item?.tokens || 0,
+                date: item?.date || item?.day
+              }))
+              .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date to ensure correct order
+          } 
+          // else if (trendsData.daily_breakdown) {
+          //   // Use the daily_breakdown data exactly as it comes from the API
+          //   const dailyBreakdown = trendsData.daily_breakdown;
+          //   const dates = Object.keys(dailyBreakdown).sort();
             
-            // Get the date range (last 7 days from the latest date)
-            const latestDate = new Date(dates[dates.length - 1]);
-            const startDate = new Date(latestDate);
-            startDate.setDate(latestDate.getDate() - 6); // 7 days total including latest date
-            
-            // Generate array of last 7 days
-            const last7Days = [];
-            for (let i = 0; i < 7; i++) {
-              const currentDate = new Date(startDate);
-              currentDate.setDate(startDate.getDate() + i);
-              const dateString = currentDate.toISOString().split('T')[0];
-              
-              last7Days.push({
-                day: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
-                contentWordsUsed: dailyBreakdown[dateString]?.words || 0,
-                imagesUsed: dailyBreakdown[dateString]?.images || 0,
-                serpSearchesUsed: dailyBreakdown[dateString]?.searches || 0,
-                cost: dailyBreakdown[dateString]?.cost || 0,
-                tokens: dailyBreakdown[dateString]?.tokens || 0,
-                date: dateString
-              });
-            }
-            
-            usageTrends = last7Days;
-          }
+          //   // Convert to array format using the data as-is from API, already sorted by date
+          //   usageTrends = dates.map(dateKey => ({
+          //     day: dateKey, // Use the date key directly from API
+          //     contentWordsUsed: dailyBreakdown[dateKey]?.words || 0,
+          //     imagesUsed: dailyBreakdown[dateKey]?.images || 0,
+          //     serpSearchesUsed: dailyBreakdown[dateKey]?.searches || 0,
+          //     cost: dailyBreakdown[dateKey]?.cost || 0,
+          //     tokens: dailyBreakdown[dateKey]?.tokens || 0,
+          //     date: dateKey
+          //   }));
+          // }
         }
 
         console.log("Transformed usage trends:", usageTrends);
@@ -564,7 +555,7 @@ export default function Users() {
         // Combine user details with usage trends
         const combinedData = {
           ...userData,
-          usageTrends: usageTrends.length > 0 ? usageTrends : userData.usageTrends || []
+          usageTrends: usageTrends || []
         };
 
         console.log("Final combined data:", combinedData);
@@ -591,11 +582,7 @@ export default function Users() {
     } catch (err) {
       console.log("Error fetching plans:", err);
       // Fallback to default plans if API fails
-      setAvailablePlans([
-        { id: 1, name: "Free", price_inr: 0 },
-        { id: 2, name: "Pro", price_inr: 1000 },
-        { id: 3, name: "Enterprise", price_inr: 5000 },
-      ]);
+      setAvailablePlans([ ]);
     } finally {
       setPlansLoading(false);
     }
@@ -925,6 +912,11 @@ export default function Users() {
                 onValueChange={(v) => {
                   console.log("Date Range changed to:", v);
                   setDateRangeFilter(v);
+                  // Clear custom dates when switching to predefined ranges
+                  if (v !== "custom") {
+                    setCustomStartDate("");
+                    setCustomEndDate("");
+                  }
                   setCurrentPage(1);
                 }}
               >
@@ -982,8 +974,13 @@ export default function Users() {
                 <Input
                   type="date"
                   value={customStartDate}
+                  max={customEndDate ? new Date(new Date(customEndDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0] : undefined}
                   onChange={(e) => {
                     setCustomStartDate(e.target.value);
+                    // Reset end date if it's before or same as the new start date
+                    if (customEndDate && e.target.value && new Date(e.target.value) >= new Date(customEndDate)) {
+                      setCustomEndDate("");
+                    }
                     setCurrentPage(1);
                   }}
                 />
@@ -995,6 +992,7 @@ export default function Users() {
                 <Input
                   type="date"
                   value={customEndDate}
+                  min={customStartDate ? new Date(new Date(customStartDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] : undefined}
                   onChange={(e) => {
                     setCustomEndDate(e.target.value);
                     setCurrentPage(1);
