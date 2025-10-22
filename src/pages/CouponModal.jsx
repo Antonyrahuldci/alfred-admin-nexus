@@ -133,9 +133,10 @@ const CouponModal = ({ isOpen, onClose, handleCouponCreated }) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-full dialog-coupon">
-        <DialogHeader className="text-center">
+    <Dialog open={isOpen} onOpenChange={() => {}}>
+      <DialogContent className="max-w-2xl w-full dialog-coupon [&>button]:hidden ">
+        <DialogHeader className="text-center ">
+          
           <DialogTitle className="text-xl font-semibold text-center">
             Send Coupon Code
           </DialogTitle>
@@ -358,14 +359,14 @@ const CouponModal = ({ isOpen, onClose, handleCouponCreated }) => {
                     height: "50px",
                     borderRadius: "8px",
                     borderColor: "#22c55e",
-                    color: "#22c55e",
+                    // color: "#22c55e",
                     transition: "all 0.2s ease",
                   }}
-                  onMouseEnter={(e) => {
+                  onMouseLeave={(e) => {
                     e.target.style.backgroundColor = "#22c55e";
                     e.target.style.color = "white";
                   }}
-                  onMouseLeave={(e) => {
+                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = "transparent";
                     e.target.style.color = "#22c55e";
                   }}
@@ -532,6 +533,15 @@ const CouponModal = ({ isOpen, onClose, handleCouponCreated }) => {
             </div>
           </form>
         </div>
+
+        <Button
+            type="button"
+            onClick={onClose}
+            className="absolute Close_Button h-8 w-8 p-0 rounded-full "
+            variant="ghost"
+          >
+            <X className="h-4 w-4" />
+          </Button>
       </DialogContent>
 
       {/* Snackbar */}

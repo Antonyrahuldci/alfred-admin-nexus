@@ -329,3 +329,11 @@ header {
 .TabelCell {
   white-space: nowrap;
 }
+.Close_Button{
+  right: 10px;
+  top: 5px;
+}
+.Close_Button:hover{
+  background-color: #FFF !important;
+  color: #000 !important;
+}
