@@ -24,7 +24,7 @@ const baseNavItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/overview" },
   { icon: Users, label: "Users", path: "/users" },
   { icon: TrendingUp, label: "User Analytics", path: "/user-analytics" },
-  { icon: CreditCard, label: "Revenue & Subs", path: "/subscriptions" },
+  { icon: CreditCard, label: "Revenue & Subscriptions", path: "/subscriptions" },
   { icon: Coins, label: "Credit & Usage", path: "/credit-usage" },
   // { icon: Mail, label: "Communications", path: "/communications" },
   // { icon: Activity, label: "System Health", path: "/system-health" },
