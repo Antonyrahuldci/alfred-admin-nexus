@@ -370,10 +370,14 @@ export default function Users() {
   const [planFilter, setPlanFilter] = useState("all");
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [activityFilter, setActivityFilter] = useState("all");
+  const [activityStatusFilter, setActivityStatusFilter] = useState("all");
+  const [dateRangeFilter, setDateRangeFilter] = useState("all");
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
   const [sortBy, setSortBy] = useState("words-desc");
   // Optional range (future UI hook). Keep nulls so backend interprets correctly.
-  const [startDate] = useState(null);
-  const [endDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [mockUsers, setMockUser] = useState([]);
@@ -385,18 +389,105 @@ export default function Users() {
   const [availablePlans, setAvailablePlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
 
-  const mockUserApi = async (page = 1, limit = 10, search = '', planId = null, sortOpt = 'words-desc', activity = 'all') => {
+  // Function to calculate date range based on selection
+  const calculateDateRange = (range, customStart = null, customEnd = null) => {
+    const today = new Date();
+    let start = null;
+    let end = null;
+
+    if (customStart && customEnd) {
+      // Use custom dates
+      start = new Date(customStart);
+      end = new Date(customEnd);
+    } else {
+      // Use predefined ranges
+      switch (range) {
+        case "7":
+          start = new Date(today);
+          start.setDate(today.getDate() - 7);
+          end = today;
+          break;
+        case "30":
+          start = new Date(today);
+          start.setDate(today.getDate() - 30);
+          end = today;
+          break;
+        case "90":
+          start = new Date(today);
+          start.setDate(today.getDate() - 90);
+          end = today;
+          break;
+        default:
+          start = null;
+          end = null;
+      }
+    }
+
+    return {
+      startDate: start ? start.toISOString().split("T")[0] : null,
+      endDate: end ? end.toISOString().split("T")[0] : null,
+    };
+  };
+
+  const mockUserApi = async (
+    page = 1,
+    limit = 10,
+    search = "",
+    planId = null,
+    sortOpt = "words-desc",
+    planStatus = "all",
+    activityStatus = "all",
+    dateRange = "all"
+  ) => {
     try {
       setLoading(true);
-      const activityStatus = activity === 'all' ? null : activity;
-      const response = await apiFunctions.getMockUser(page, limit, search, planId, sortOpt, activityStatus, startDate, endDate);
+      const planStatusFilter = planStatus === "all" ? null : planStatus;
+      const activityStatusParam =
+        activityStatus === "all" ? null : activityStatus;
+
+      // Calculate date range
+      const { startDate: calculatedStartDate, endDate: calculatedEndDate } =
+        calculateDateRange(
+          dateRange,
+          customStartDate || null,
+          customEndDate || null
+        );
+
+      console.log(
+        "API Call - planStatusFilter:",
+        planStatusFilter,
+        "activityStatus:",
+        activityStatusParam,
+        "dateRange:",
+        dateRange,
+        "startDate:",
+        calculatedStartDate,
+        "endDate:",
+        calculatedEndDate
+      );
+
+      const response = await apiFunctions.getMockUser(
+        page,
+        limit,
+        search,
+        planId,
+        sortOpt,
+        activityStatusParam,
+        calculatedStartDate,
+        calculatedEndDate,
+        planStatusFilter
+      );
       if (response.data.status === 200) {
+        console.log(
+          "API Response - users count:",
+          response.data.data.users?.length
+        );
         setMockUser(response.data.data.users);
         setTotalPages(response.data.data.pagination.totalPages);
         setTotalRecords(response.data.data.pagination.totalRecords);
       }
     } catch (err) {
-      console.log(err);
+      console.log("API Error:", err);
     } finally {
       setLoading(false);
     }
@@ -405,9 +496,73 @@ export default function Users() {
   const fetchUserDetails = async (userId) => {
     try {
       setUserDetailsLoading(true);
-      const response = await apiFunctions.getUserUsageData(userId);
-      if (response.data.status === 200) {
-        setUserDetailsData(response.data.data);
+      
+      // Fetch both APIs in parallel
+      const [userDetailsResponse, usageTrendsResponse] = await Promise.all([
+        apiFunctions.getUserUsageData(userId),
+        apiFunctions.getUsageTrends(userId)
+      ]);
+      
+      console.log("User Details API Response:", userDetailsResponse);
+      console.log("Usage Trends API Response:", usageTrendsResponse);
+      
+      if (userDetailsResponse.data.status === 200) {
+        // Use the existing user details data
+        const userData = userDetailsResponse.data.data;
+        console.log("userData",userData)
+        // Transform usage trends data for chart
+        let usageTrends = [];
+        console.log("usageTrendsResponse.data",usageTrendsResponse?.data)
+        if (usageTrendsResponse?.data) {
+          console.log("HIII")
+          const trendsData = usageTrendsResponse.data;
+          console.log("trendsData",trendsData)
+          // Check if the API returns data in the expected format
+          if (Array.isArray(trendsData)) {
+            // Use the data exactly as it comes from the API, but sort by date to ensure correct order
+            usageTrends = trendsData
+              .map(item => ({
+                day: item?.day || item?.date, // Use the day field directly from API
+                contentWordsUsed: item?.contentWordsUsed || item?.words || 0,
+                imagesUsed: item?.imagesUsed || item?.images || 0,
+                serpSearchesUsed: item?.serpSearchesUsed || item?.searches || 0,
+                cost: item?.cost || 0,
+                tokens: item?.tokens || 0,
+                date: item?.date || item?.day
+              }))
+              .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date to ensure correct order
+          } 
+          // else if (trendsData.daily_breakdown) {
+          //   // Use the daily_breakdown data exactly as it comes from the API
+          //   const dailyBreakdown = trendsData.daily_breakdown;
+          //   const dates = Object.keys(dailyBreakdown).sort();
+            
+          //   // Convert to array format using the data as-is from API, already sorted by date
+          //   usageTrends = dates.map(dateKey => ({
+          //     day: dateKey, // Use the date key directly from API
+          //     contentWordsUsed: dailyBreakdown[dateKey]?.words || 0,
+          //     imagesUsed: dailyBreakdown[dateKey]?.images || 0,
+          //     serpSearchesUsed: dailyBreakdown[dateKey]?.searches || 0,
+          //     cost: dailyBreakdown[dateKey]?.cost || 0,
+          //     tokens: dailyBreakdown[dateKey]?.tokens || 0,
+          //     date: dateKey
+          //   }));
+          // }
+        }
+
+        console.log("Transformed usage trends:", usageTrends);
+
+        // Combine user details with usage trends
+        const combinedData = {
+          ...userData,
+          usageTrends: usageTrends || []
+        };
+
+        console.log("Final combined data:", combinedData);
+        setUserDetailsData(combinedData);
+      } else {
+        console.log("User details API call failed:", userDetailsResponse.data.message);
+        setUserDetailsData(null);
       }
     } catch (err) {
       console.log("Error fetching user details:", err);
@@ -427,23 +582,47 @@ export default function Users() {
     } catch (err) {
       console.log("Error fetching plans:", err);
       // Fallback to default plans if API fails
-      setAvailablePlans([
-        { id: 1, name: "Free", price_inr: 0 },
-        { id: 2, name: "Pro", price_inr: 1000 },
-        { id: 3, name: "Enterprise", price_inr: 5000 },
-      ]);
+      setAvailablePlans([ ]);
     } finally {
       setPlansLoading(false);
     }
   };
 
   useEffect(() => {
-    mockUserApi(currentPage, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter);
-  }, [currentPage, searchQuery, selectedPlanId, sortBy, activityFilter]);
+    mockUserApi(
+      currentPage,
+      itemsPerPage,
+      searchQuery,
+      selectedPlanId,
+      sortBy,
+      activityFilter,
+      activityStatusFilter,
+      dateRangeFilter
+    );
+  }, [
+    currentPage,
+    searchQuery,
+    selectedPlanId,
+    sortBy,
+    activityFilter,
+    activityStatusFilter,
+    dateRangeFilter,
+    customStartDate,
+    customEndDate,
+  ]);
 
   // Initial load
   useEffect(() => {
-    mockUserApi(1, itemsPerPage, searchQuery, selectedPlanId, sortBy, activityFilter);
+    mockUserApi(
+      1,
+      itemsPerPage,
+      searchQuery,
+      selectedPlanId,
+      sortBy,
+      activityFilter,
+      activityStatusFilter,
+      dateRangeFilter
+    );
     fetchAllPlans();
   }, []);
 
@@ -463,43 +642,8 @@ export default function Users() {
   };
 
   console.log("planFilter", planFilter);
-  console.log("mockUsers", mockUsers); // Client-side filtering (since API doesn't support filtering yet)
-  const filteredAndSortedUsers = mockUsers
-    .filter((user) => {
-      const matchesSearch =
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Fix plan filtering to work with dynamic plans
-      const userPlan = user.plan;
-      const matchesPlan =
-        planFilter === "all" ||
-        (userPlan && userPlan.toLowerCase() === planFilter.toLowerCase());
-
-      const matchesStatus =
-        activityFilter === "all" ||
-        (activityFilter === "N/A" && (!user.status || user.status === "N/A" || user.status === "")) ||
-        (user.status && user.status === activityFilter);
-      return matchesSearch && matchesPlan && matchesStatus;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "words-desc":
-          return b.wordCount - a.wordCount;
-        case "words-asc":
-          return a.wordCount - b.wordCount;
-        case "images-desc":
-          return b.images - a.images;
-        case "images-asc":
-          return a.images - b.images;
-        case "serp-desc":
-          return b.serpUsage - a.serpUsage;
-        case "serp-asc":
-          return a.serpUsage - b.serpUsage;
-        default:
-          return 0;
-      }
-    });
+  console.log("mockUsers", mockUsers); // Data is now filtered by API
+  const filteredAndSortedUsers = mockUsers; // No client-side filtering needed since API handles it
 
   // Reset to first page when filters change
   // useEffect(() => {
@@ -657,9 +801,11 @@ export default function Users() {
           <CardTitle>Filters & Search</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Search Users</label>
+              <label className="text-sm font-medium text-muted-foreground">
+                Search Users
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -671,14 +817,24 @@ export default function Users() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Plan Type</label>
-              <Select value={planFilter} onValueChange={(val)=>{
-                setPlanFilter(val);
-                if(val === 'all'){ setSelectedPlanId(null); return; }
-                const match = availablePlans.find(p=>p.name.toLowerCase()===val.toLowerCase());
-                setSelectedPlanId(match ? match.id : null);
-                setCurrentPage(1);
-              }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Plan Type
+              </label>
+              <Select
+                value={planFilter}
+                onValueChange={(val) => {
+                  setPlanFilter(val);
+                  if (val === "all") {
+                    setSelectedPlanId(null);
+                    return;
+                  }
+                  const match = availablePlans.find(
+                    (p) => p.name.toLowerCase() === val.toLowerCase()
+                  );
+                  setSelectedPlanId(match ? match.id : null);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Plan Type" />
                 </SelectTrigger>
@@ -699,8 +855,17 @@ export default function Users() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Plan Status</label>
-              <Select value={activityFilter} onValueChange={(v)=>{ setActivityFilter(v); setCurrentPage(1); }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Plan Status
+              </label>
+              <Select
+                value={activityFilter}
+                onValueChange={(v) => {
+                  console.log("Plan Status changed to:", v);
+                  setActivityFilter(v);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Plan Status" />
                 </SelectTrigger>
@@ -708,31 +873,134 @@ export default function Users() {
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Trial">Trial</SelectItem>
-                  <SelectItem value="Free Trial Cancelled">Free Trial Cancelled</SelectItem>
+                  <SelectItem value="Free Trial Cancelled">
+                    Free Trial Cancelled
+                  </SelectItem>
                   <SelectItem value="Cancelled">Cancelled</SelectItem>
                   <SelectItem value="N/A">N/A</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Sort By</label>
-              <Select value={sortBy} onValueChange={(v)=>{ setSortBy(v); setCurrentPage(1); }}>
+              <label className="text-sm font-medium text-muted-foreground">
+                Activity Status
+              </label>
+              <Select
+                value={activityStatusFilter}
+                onValueChange={(v) => {
+                  console.log("Activity Status changed to:", v);
+                  setActivityStatusFilter(v);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Activity Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Activity</SelectItem>
+                  <SelectItem value="active">Active Users</SelectItem>
+                  <SelectItem value="inactive">Inactive Users</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Date Range
+              </label>
+              <Select
+                value={dateRangeFilter}
+                onValueChange={(v) => {
+                  console.log("Date Range changed to:", v);
+                  setDateRangeFilter(v);
+                  // Clear custom dates when switching to predefined ranges
+                  if (v !== "custom") {
+                    setCustomStartDate("");
+                    setCustomEndDate("");
+                  }
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Date Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="7">Last 7 Days</SelectItem>
+                  <SelectItem value="30">Last 30 Days</SelectItem>
+                  <SelectItem value="90">Last 90 Days</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Sort By
+              </label>
+              <Select
+                value={sortBy}
+                onValueChange={(v) => {
+                  setSortBy(v);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="words-desc">Words (High to Low)</SelectItem>
+                  <SelectItem value="words-desc">
+                    Words (High to Low)
+                  </SelectItem>
                   <SelectItem value="words-asc">Words (Low to High)</SelectItem>
                   <SelectItem value="images-desc">
                     Images (High to Low)
                   </SelectItem>
-                  <SelectItem value="images-asc">Images (Low to High)</SelectItem>
+                  <SelectItem value="images-asc">
+                    Images (Low to High)
+                  </SelectItem>
                   <SelectItem value="serp-desc">SERP (High to Low)</SelectItem>
                   <SelectItem value="serp-asc">SERP (Low to High)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
+          {/* Custom Date Range Inputs */}
+          {dateRangeFilter === "custom" && (
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">
+                  Start Date
+                </label>
+                <Input
+                  type="date"
+                  value={customStartDate}
+                  max={customEndDate ? new Date(new Date(customEndDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0] : undefined}
+                  onChange={(e) => {
+                    setCustomStartDate(e.target.value);
+                    // Reset end date if it's before or same as the new start date
+                    if (customEndDate && e.target.value && new Date(e.target.value) >= new Date(customEndDate)) {
+                      setCustomEndDate("");
+                    }
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">
+                  End Date
+                </label>
+                <Input
+                  type="date"
+                  value={customEndDate}
+                  min={customStartDate ? new Date(new Date(customStartDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] : undefined}
+                  onChange={(e) => {
+                    setCustomEndDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -759,7 +1027,7 @@ export default function Users() {
 
       <Card>
         <CardContent className="p-0">
-        {loading ? (
+          {loading ? (
             <Table>
               <TableHeader className="Tabel_Head">
                 <TableRow>
@@ -780,17 +1048,39 @@ export default function Users() {
               <TableBody>
                 {Array.from({ length: 10 }).map((_, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="font-medium"><Skeleton className="h-4 w-10" /></TableCell>
-                    <TableCell className="font-medium"><Skeleton className="h-4 w-40" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-64" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-8 rounded-full" /></TableCell>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-4 w-10" />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-4 w-40" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-64" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-28" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-28" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-16 ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-12 ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-12 ml-auto" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -864,10 +1154,18 @@ export default function Users() {
                     <TableCell>
                       <Badge
                         className={`TabelCell ${getStatusColorClass(
-                          user.autoPay_canceled
+                          user.autoPay_canceled === true
+                            ? "disabled"
+                            : user.autoPay_canceled === false
+                            ? "enabled"
+                            : "na"
                         )}`}
                       >
-                        {user?.autoPay_canceled ? "Disabled" : "Enabled"}
+                        {user.autoPay_canceled === true
+                          ? "Disabled"
+                          : user.autoPay_canceled === false
+                          ? "Enabled"
+                          : "N/A"}
                       </Badge>
                     </TableCell>
                     <TableCell className="TabelCell">{user.joinDate}</TableCell>
@@ -877,9 +1175,7 @@ export default function Users() {
                     <TableCell className="text-right ">
                       {user.wordCount.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right ">
-                      {user.images}
-                    </TableCell>
+                    <TableCell className="text-right ">{user.images}</TableCell>
                     <TableCell className="text-right ">
                       {user.serpUsage}
                     </TableCell>
@@ -972,7 +1268,7 @@ export default function Users() {
                                       Images Used
                                     </p>
                                     <p className="text-lg font-semibold">
-                          {userDetailsData.usageStats.imagesUsed}
+                                      {userDetailsData.usageStats.imagesUsed}
                                     </p>
                                   </div>
                                   <div className="space-y-1">
@@ -994,47 +1290,63 @@ export default function Users() {
                                 <h3 className="mb-4 text-lg font-semibold">
                                   Usage Trends (Last 7 Days)
                                 </h3>
-                                <ResponsiveContainer width="100%" height={200}>
-                                  <LineChart data={userDetailsData.usageTrends}>
-                                    <CartesianGrid
-                                      strokeDasharray="3 3"
-                                      stroke="hsl(var(--border))"
-                                    />
-                                    <XAxis
-                                      dataKey="day"
-                                      stroke="hsl(var(--muted-foreground))"
-                                    />
-                                    <YAxis stroke="hsl(var(--muted-foreground))" />
-                                    <Tooltip
-                                      contentStyle={{
-                                        backgroundColor: "hsl(var(--card))",
-                                        border: "1px solid hsl(var(--border))",
-                                        borderRadius: "0.5rem",
-                                      }}
-                                    />
-                                    <Line
-                                      type="monotone"
-                                      dataKey="contentWordsUsed"
-                                      stroke="hsl(var(--primary))"
-                                      strokeWidth={2}
-                                      name="Content Words"
-                                    />
-                                    <Line
-                                      type="monotone"
-                                      dataKey="imagesUsed"
-                                      stroke="hsl(var(--success))"
-                                      strokeWidth={2}
-                                      name="Images"
-                                    />
-                                    <Line
-                                      type="monotone"
-                                      dataKey="serpSearchesUsed"
-                                      stroke="hsl(var(--warning))"
-                                      strokeWidth={2}
-                                      name="SERP Searches"
-                                    />
-                                  </LineChart>
-                                </ResponsiveContainer>
+                                {userDetailsData.usageTrends && userDetailsData.usageTrends.length > 0 ? (
+                                  <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={userDetailsData.usageTrends}>
+                                      <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="hsl(var(--border))"
+                                      />
+                                      <XAxis
+                                        dataKey="day"
+                                        stroke="hsl(var(--muted-foreground))"
+                                      />
+                                      <YAxis 
+                                        stroke="hsl(var(--muted-foreground))"
+                                        domain={[0, 'dataMax']}
+                                      />
+                                      <Tooltip
+                                        contentStyle={{
+                                          backgroundColor: "hsl(var(--card))",
+                                          border: "1px solid hsl(var(--border))",
+                                          borderRadius: "0.5rem",
+                                        }}
+                                        formatter={(value, name) => [value.toLocaleString(), name]}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="contentWordsUsed"
+                                        stroke="hsl(var(--primary))"
+                                        strokeWidth={2}
+                                        name="Content Words"
+                                        dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
+                                        connectNulls={false}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="imagesUsed"
+                                        stroke="hsl(var(--success))"
+                                        strokeWidth={2}
+                                        name="Images"
+                                        dot={{ fill: "hsl(var(--success))", strokeWidth: 2, r: 4 }}
+                                        connectNulls={false}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="serpSearchesUsed"
+                                        stroke="hsl(var(--warning))"
+                                        strokeWidth={2}
+                                        name="SERP Searches"
+                                        dot={{ fill: "hsl(var(--warning))", strokeWidth: 2, r: 4 }}
+                                        connectNulls={false}
+                                      />
+                                    </LineChart>
+                                  </ResponsiveContainer>
+                                ) : (
+                                  <div className="flex justify-center items-center h-48 text-muted-foreground">
+                                    No usage data available for the selected period
+                                  </div>
+                                )}
                               </div>
 
                               {/* Recent Activities */}

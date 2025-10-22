@@ -86,8 +86,8 @@ export const Navbar = () => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
+            {/* <DropdownMenuSeparator /> */}
             {/* <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem> */}
             <DropdownMenuSeparator />
