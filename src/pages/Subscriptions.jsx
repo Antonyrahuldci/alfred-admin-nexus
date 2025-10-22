@@ -537,7 +537,7 @@ export default function Subscriptions() {
                     <TableCell>
                       <Skeleton className="h-6 w-28" />
                     </TableCell>
-                    <TableCell className="font-mono">
+                    <TableCell className="">
                       <Skeleton className="h-4 w-20" />
                     </TableCell>
                     <TableCell>
@@ -563,7 +563,7 @@ export default function Subscriptions() {
                         {payment.plan}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono">
+                    <TableCell className="">
                       {Number(payment.price_usd / 100) * exchangeRate}
                     </TableCell>
                     <TableCell>{payment.date}</TableCell>
