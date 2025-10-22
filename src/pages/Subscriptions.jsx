@@ -564,7 +564,7 @@ export default function Subscriptions() {
                       </Badge>
                     </TableCell>
                     <TableCell className="">
-                      {Number(payment.price_usd / 100) * exchangeRate}
+                       ₹ {Number(payment.price_usd / 100) * exchangeRate}
                     </TableCell>
                     <TableCell>{payment.date}</TableCell>
                     <TableCell>
