@@ -548,9 +548,11 @@ export default function Subscriptions() {
                     </TableCell>
                   </TableRow>
                 ))
-                : paymentHistory.map((payment, index) => (
+                : paymentHistory.map((payment, index) => {
+                  const serialNumber = Math.max(1, (currentPage - 1) * itemsPerPage + index + 1);
+                  return (
                   <TableRow key={payment.id}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableCell className="font-medium">{serialNumber}</TableCell>
                     <TableCell className="font-medium">
                       {payment.user}
                     </TableCell>
@@ -564,7 +566,7 @@ export default function Subscriptions() {
                       </Badge>
                     </TableCell>
                     <TableCell className="">
-                       ₹ {Number(payment.price_usd / 100) * exchangeRate}
+                       ₹ {(Number(payment.price_usd / 100) * exchangeRate).toFixed(2)}
                     </TableCell>
                     <TableCell>{payment.date}</TableCell>
                     <TableCell>
@@ -577,7 +579,8 @@ export default function Subscriptions() {
                       </Badge>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
             </TableBody>
           </Table>
         </CardContent>
