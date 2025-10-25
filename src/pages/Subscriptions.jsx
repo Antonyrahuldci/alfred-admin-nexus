@@ -566,7 +566,11 @@ export default function Subscriptions() {
                       </Badge>
                     </TableCell>
                     <TableCell className="">
-                       ₹ {(Number(payment.price_usd / 100) * exchangeRate).toFixed(2)}
+                    {payment?.price_usd !== "-" 
+                     ? "₹" + Number(payment.price_usd).toFixed(2) 
+                        : "-"}
+
+                      
                     </TableCell>
                     <TableCell>{payment.date}</TableCell>
                     <TableCell>

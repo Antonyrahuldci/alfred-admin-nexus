@@ -299,7 +299,8 @@ fetchExchangeRate()
             />
             <StatCard
               title="Total Revenue"
-              value={`₹${((((dashboardStats?.totalRevenue?.value || 0) / 100) * (exchangeRate || 0))).toLocaleString()}`}
+              // value={`₹${((((dashboardStats?.totalRevenue?.value || 0) / 100) * (exchangeRate || 0))).toLocaleString()}`}
+              value={`₹${((((dashboardStats?.totalRevenue?.value || 0) ))).toLocaleString()}`}
               icon={MdCurrencyRupee}
               trend={{
                 value: Math.abs(dashboardStats?.totalRevenue?.change || 0),
@@ -439,7 +440,8 @@ fetchExchangeRate()
                       borderRadius: "0.5rem",
                     }}
                     formatter={(value) => [
-                      `₹${(((value / 100) * (exchangeRate || 0))).toLocaleString()}`,
+                      // `₹${(((value / 100) * (exchangeRate || 0))).toLocaleString()}`,
+                      `₹${(((value) )).toLocaleString()}`,
                       "Revenue",
                     ]}
                   />

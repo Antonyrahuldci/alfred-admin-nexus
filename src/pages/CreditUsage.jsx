@@ -258,7 +258,28 @@ export default function CreditUsage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Users (Based on Credit Usage)
+                </p>
+                <p className="text-3xl font-bold">
+                  {loading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : totals?.total_users !== null && totals?.total_users !== undefined ? (
+                    Number(totals.total_users).toLocaleString()
+                  ) : (
+                    "—"
+                  )}
+                </p>
+              </div>
+              <Zap className="h-8 w-8 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
