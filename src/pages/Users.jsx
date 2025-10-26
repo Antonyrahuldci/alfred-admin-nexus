@@ -1292,19 +1292,33 @@ export default function Users() {
                                 </h3>
                                 {userDetailsData.usageTrends && userDetailsData.usageTrends.length > 0 ? (
                                   <ResponsiveContainer width="100%" height={200}>
-                                    <LineChart data={userDetailsData.usageTrends}>
-                                      <CartesianGrid
-                                        strokeDasharray="3 3"
-                                        stroke="hsl(var(--border))"
-                                      />
-                                      <XAxis
-                                        dataKey="day"
-                                        stroke="hsl(var(--muted-foreground))"
-                                      />
-                                      <YAxis 
-                                        stroke="hsl(var(--muted-foreground))"
-                                        domain={[0, 'dataMax']}
-                                      />
+                                    {(() => {
+                                      // Calculate max value from all data points with 20% padding
+                                      const maxValue = Math.max(
+                                        ...userDetailsData.usageTrends.flatMap(item => [
+                                          item.contentWordsUsed || 0,
+                                          item.imagesUsed || 0,
+                                          item.serpSearchesUsed || 0
+                                        ])
+                                      );
+                                      const yAxisMax = Math.ceil(maxValue * 1.2); // Add 20% padding
+                                      
+                                      return (
+                                        <LineChart data={userDetailsData.usageTrends}>
+                                          <CartesianGrid
+                                            strokeDasharray="3 3"
+                                            stroke="hsl(var(--border))"
+                                          />
+                                          <XAxis
+                                            dataKey="day"
+                                            stroke="hsl(var(--muted-foreground))"
+                                          />
+                                          <YAxis 
+                                            stroke="hsl(var(--muted-foreground))"
+                                            domain={[0, yAxisMax]}
+                                            allowDataOverflow={false}
+                                            tick={{ fontSize: 12 }}
+                                          />
                                       <Tooltip
                                         contentStyle={{
                                           backgroundColor: "hsl(var(--card))",
@@ -1321,6 +1335,7 @@ export default function Users() {
                                         name="Content Words"
                                         dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
                                         connectNulls={false}
+                                        isAnimationActive={false}
                                       />
                                       <Line
                                         type="monotone"
@@ -1330,6 +1345,7 @@ export default function Users() {
                                         name="Images"
                                         dot={{ fill: "hsl(var(--success))", strokeWidth: 2, r: 4 }}
                                         connectNulls={false}
+                                        isAnimationActive={false}
                                       />
                                       <Line
                                         type="monotone"
@@ -1339,8 +1355,11 @@ export default function Users() {
                                         name="SERP Searches"
                                         dot={{ fill: "hsl(var(--warning))", strokeWidth: 2, r: 4 }}
                                         connectNulls={false}
+                                        isAnimationActive={false}
                                       />
                                     </LineChart>
+                                      );
+                                    })()}
                                   </ResponsiveContainer>
                                 ) : (
                                   <div className="flex justify-center items-center h-48 text-muted-foreground">

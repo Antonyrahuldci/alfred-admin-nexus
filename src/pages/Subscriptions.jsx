@@ -148,7 +148,7 @@ export default function Subscriptions() {
         if (exchangeRate) {
           const convertedPlans = response.data.data.map((plan) => ({
             ...plan,
-            revenue: Math.round((plan.revenue / 100) * exchangeRate), // Convert USD to INR
+            revenue: Math.round(plan.revenue), // Convert USD to INR
             price: `₹${Math.round(
               (parseInt(plan.price.replace("$", "")) / 100) * exchangeRate
             )}`, // Convert USD to INR
