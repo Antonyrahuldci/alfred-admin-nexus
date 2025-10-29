@@ -18,6 +18,8 @@ import Integrations from "./pages/Integrations";
 import PredictiveInsights from "./pages/PredictiveInsights";
 import AdminControls from "./pages/AdminControls";
 import Reports from "./pages/Reports";
+import ContactUsRequests from "./pages/ContactUsRequests";
+import NewsletterSubscriptions from "./pages/NewsletterSubscriptions";
 import NotFound from "./pages/NotFound";
 import Swal from "sweetalert2";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -39,6 +41,8 @@ const App = () => (
               <Route path="/user-analytics" element={<UserAnalytics />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/credit-usage" element={<CreditUsage />} />
+              <Route path="/contact-us-requests" element={<ContactUsRequests />} />
+              <Route path="/newsletter-subscriptions" element={<NewsletterSubscriptions />} />
               <Route path="/logs" element={<Logs />} />
               <Route path="/communications" element={<Communications />} />
               <Route path="/system-health" element={<SystemHealth />} />

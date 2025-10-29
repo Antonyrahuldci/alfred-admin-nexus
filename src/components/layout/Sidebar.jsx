@@ -15,6 +15,8 @@ import {
   Sparkles,
   UserCog,
   FileSearch,
+  MessageSquare,
+  Newspaper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,8 @@ const baseNavItems = [
   { icon: TrendingUp, label: "User Analytics", path: "/user-analytics" },
   { icon: CreditCard, label: "Revenue & Subscriptions", path: "/subscriptions" },
   { icon: Coins, label: "Credit & Usage", path: "/credit-usage" },
+  { icon: MessageSquare, label: "Contact Us Requests", path: "/contact-us-requests" },
+  { icon: Newspaper, label: "Newsletter Subscriptions", path: "/newsletter-subscriptions" },
   // { icon: Mail, label: "Communications", path: "/communications" },
   // { icon: Activity, label: "System Health", path: "/system-health" },
   // { icon: Shield, label: "Security", path: "/security" },

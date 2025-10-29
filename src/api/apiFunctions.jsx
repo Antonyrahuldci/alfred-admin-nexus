@@ -78,7 +78,21 @@ const apiFunctions = {
   getUserUsageData: (userId) => method.get(`${appConstants?.newAdminBaseUrl}/user-usage/${userId}`),
   getUsageTrends: (userId) => method.get(`https://backend-alfred.simbli.ai/admin/usage-trends?userId=${userId}`),
   getAllPlans: () => method.get(`${appConstants?.newAdminBaseUrl}/all-plans`),
-  getUserByCountry: (timeRange) => method.get(`${appConstants?.newAdminBaseUrl}/getAllUserByCountry?timeRange=${timeRange}`)
+  getUserByCountry: (timeRange) => method.get(`${appConstants?.newAdminBaseUrl}/getAllUserByCountry?timeRange=${timeRange}`),
+  getContactUsRequests: (page, limit, search) => {
+    const params = new URLSearchParams();
+    params.append('page', page || 1);
+    params.append('limit', limit || 10);
+    if (search) params.append('search', search);
+    return method.get(`${appConstants?.newAdminBaseUrl}/contact-us-requests?${params.toString()}`);
+  },
+  getNewsletterSubscriptions: (page, limit, search) => {
+    const params = new URLSearchParams();
+    params.append('page', page || 1);
+    params.append('limit', limit || 10);
+    if (search) params.append('search', search);
+    return method.get(`${appConstants?.newAdminBaseUrl}/newsletter/subscriptions?${params.toString()}`);
+  }
 };
 
 export default apiFunctions;
