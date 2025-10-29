@@ -210,7 +210,7 @@ fetchExchangeRate()
           Welcome to your Simbli Admin dashboard
         </p>
         </div>
-        {exchangeRate && (
+        {/* {exchangeRate && (
                   <Card className="overflow-hidden bg-gradient-card w-72">
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between">
@@ -240,7 +240,7 @@ fetchExchangeRate()
                       </div>
                     </CardContent>
                   </Card>
-                )}
+                )} */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

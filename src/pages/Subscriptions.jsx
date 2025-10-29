@@ -269,7 +269,7 @@ export default function Subscriptions() {
             Manage plans, pricing, and subscriber data
           </p>
         </div>
-        {exchangeRate && (
+        {/* {exchangeRate && (
           <Card className="overflow-hidden bg-gradient-card w-72">
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
@@ -299,7 +299,7 @@ export default function Subscriptions() {
               </div>
             </CardContent>
           </Card>
-        )}
+        )} */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
