@@ -65,6 +65,7 @@ export default function NewsletterSubscriptions() {
         </div>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
       <Card>
         <CardHeader>
           <CardTitle>Filters & Search</CardTitle>
@@ -91,8 +92,6 @@ export default function NewsletterSubscriptions() {
           </div>
         </CardContent>
       </Card>
-
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
