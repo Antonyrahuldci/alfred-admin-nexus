@@ -65,7 +65,35 @@ export default function ContactUsRequests() {
         </div>
       </div>
 
-      <Card>
+      {/* <Card>
+        <CardHeader>
+          <CardTitle>Filters & Search</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-1">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Search Requests
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, or phone..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card> */}
+
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+        <Card>
         <CardHeader>
           <CardTitle>Filters & Search</CardTitle>
         </CardHeader>
@@ -91,8 +119,6 @@ export default function ContactUsRequests() {
           </div>
         </CardContent>
       </Card>
-
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
@@ -128,7 +154,7 @@ export default function ContactUsRequests() {
                   <TableHead>S.No</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Phone Number</TableHead>
+                  <TableHead  className="whitespace-nowrap">Phone Number</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Created At</TableHead>
                 </TableRow>
@@ -165,7 +191,7 @@ export default function ContactUsRequests() {
                   <TableHead>S.No</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Phone Number</TableHead>
+                  <TableHead className="whitespace-nowrap">Phone Number</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Created At</TableHead>
                 </TableRow>
@@ -179,7 +205,7 @@ export default function ContactUsRequests() {
                       </TableCell>
                       <TableCell className="font-medium">{request.name}</TableCell>
                       <TableCell>{request.email}</TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         {request.country_code} {request.phone_number}
                       </TableCell>
                       <TableCell className="max-w-md truncate">

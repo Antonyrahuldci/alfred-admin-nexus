@@ -957,8 +957,8 @@ export default function Users() {
                   <SelectItem value="images-asc">
                     Images (Low to High)
                   </SelectItem>
-                  <SelectItem value="serp-desc">SERP (High to Low)</SelectItem>
-                  <SelectItem value="serp-asc">SERP (Low to High)</SelectItem>
+                  <SelectItem value="serp-desc">Web Search (High to Low)</SelectItem>
+                  <SelectItem value="serp-asc">Web Search (Low to High)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

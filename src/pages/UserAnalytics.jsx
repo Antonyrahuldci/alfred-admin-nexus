@@ -218,7 +218,7 @@ export default function UserAnalytics() {
                   strokeDasharray="3 3"
                   stroke="hsl(var(--border))"
                 />
-                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" style={{fontSize:"14px"}} />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
