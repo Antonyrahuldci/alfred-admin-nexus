@@ -75,6 +75,7 @@ const apiFunctions = {
   getUserPlansData: () => method.get(`${appConstants?.newAdminBaseUrl}/subscription-plans-with-revenue`),
   getPaymentHistory: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/payment-history?page=${page || 1}&limit=${limit || 10}`),
   getCoupons: (page, limit) => method.get(`${appConstants?.newAdminBaseUrl}/coupons?page=${page || 1}&limit=${limit || 10}`),
+  getAddonRevenueByType: () => method.get(`${appConstants?.newAdminBaseUrl}/addons/revenue-by-type`),
   getUserUsageData: (userId) => method.get(`${appConstants?.newAdminBaseUrl}/user-usage/${userId}`),
   getUsageTrends: (userId) => method.get(`https://backend-alfred.simbli.ai/admin/usage-trends?userId=${userId}`),
   getAllPlans: () => method.get(`${appConstants?.newAdminBaseUrl}/all-plans`),

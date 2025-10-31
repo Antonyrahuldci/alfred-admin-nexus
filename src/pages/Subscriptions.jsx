@@ -99,6 +99,8 @@ export default function Subscriptions() {
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [loadingPayments, setLoadingPayments] = useState(true);
   const [loadingCoupons, setLoadingCoupons] = useState(true);
+  const [loadingAddonRevenue, setLoadingAddonRevenue] = useState(true);
+  const [addonRevenue, setAddonRevenue] = useState([]);
   const [exchangeRate, setExchangeRate] = useState(null);
 
   const getPlanColorClass = (plan) => {
@@ -198,6 +200,20 @@ export default function Subscriptions() {
     }
   }, []);
 
+  const getAddonRevenueByTypeApi = useCallback(async () => {
+    try {
+      setLoadingAddonRevenue(true);
+      const response = await apiFunctions.getAddonRevenueByType();
+      if (response.data.status === 200) {
+        setAddonRevenue(response.data.data || []);
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoadingAddonRevenue(false);
+    }
+  }, []);
+
   const fetchExchangeRate = useCallback(async () => {
     try {
       // Using exchangerate-api.com (free tier)
@@ -222,7 +238,8 @@ export default function Subscriptions() {
     fetchExchangeRate(); // Fetch current exchange rate
     getPaymentHistoryDataApi(currentPage, itemsPerPage);
     getCouponsApi(1, 10);
-  }, [fetchExchangeRate, getPaymentHistoryDataApi, getCouponsApi]);
+    getAddonRevenueByTypeApi();
+  }, [fetchExchangeRate, getPaymentHistoryDataApi, getCouponsApi, getAddonRevenueByTypeApi]);
 
   // Fetch plans data when exchange rate is available
   useEffect(() => {
@@ -370,6 +387,61 @@ export default function Subscriptions() {
               </CardContent>
             </Card>
           ))}
+      </div>
+
+      {/* Addon Revenue by Type */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {loadingAddonRevenue
+          ? Array.from({ length: 3 }).map((_, idx) => (
+            <Card key={idx} className="overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-6 w-16" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+          : addonRevenue.map((addon) => {
+            const formattedType = addon.addon_type
+              .split("_")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ")
+              .replace("Serp Searches", "Web Searches");
+            return (
+              <Card
+                key={addon.addon_type}
+                className="overflow-hidden bg-gradient-card"
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="break-words">{formattedType}</span>
+                    <Badge variant="default">
+                      Addon
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <MdCurrencyRupee className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-2xl font-bold">
+                      {addon.total_amount.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      revenue
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
