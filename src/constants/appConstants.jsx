@@ -6,4 +6,5 @@ export const appConstants = {
   baseUrl: "https://backend-demo.simbli.ai/api/v1/admin",
 
   alfredBackendBaseUrl: "https://backend-alfred.simbli.ai",
+  // alfredBackendBaseUrl: "http://localhost:8000",
 };
