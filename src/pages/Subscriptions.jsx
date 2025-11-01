@@ -381,7 +381,7 @@ export default function Subscriptions() {
                     <span className="text-2xl font-bold">
                       {plan.revenue.toLocaleString()}
                     </span>
-                    <span className="text-sm text-muted-foreground">MRR</span>
+                    {/* <span className="text-sm text-muted-foreground">MRR</span> */}
                   </div>
                 )}
               </CardContent>
