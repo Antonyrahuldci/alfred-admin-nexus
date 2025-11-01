@@ -430,7 +430,8 @@ fetchExchangeRate()
                       if (inrValue >= 1000) {
                         return `₹${(inrValue / 1000).toFixed(1)}k`;
                       }
-                      return `₹${inrValue}`;
+                      // return `₹${inrValue}`;
+                      return `₹${inrValue.toFixed(2)}`;
                     }}
                   />
                   <Tooltip
